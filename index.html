@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nexus Chat | Рабочая версия</title>
+    <title>Nexus Chat | Рабочий мессенджер</title>
     <style>
         * {
             margin: 0;
@@ -17,17 +17,18 @@
             body { padding: 0; }
             .app-container { width: 100%; max-width: 100%; height: 100vh; border-radius: 0; }
             .messenger-header { padding: 10px 15px; }
-            h1 { font-size: 1.1rem; }
-            .logo-icon { width: 32px; height: 32px; font-size: 1.1rem; }
-            .profile-btn, .logout-btn { padding: 5px 10px; font-size: 0.75rem; }
-            .chats-sidebar { width: 280px; position: fixed; left: -280px; top: 0; height: 100vh; z-index: 1000; transition: left 0.3s ease; background: inherit; }
+            h1 { font-size: 1rem; }
+            .logo-icon { width: 28px; height: 28px; font-size: 1rem; }
+            .profile-btn, .logout-btn { padding: 4px 8px; font-size: 0.7rem; }
+            .chats-sidebar { width: 260px; position: fixed; left: -260px; top: 0; height: 100vh; z-index: 1000; transition: left 0.3s ease; background: #f5f5f5; }
+            body.dark .chats-sidebar { background: #151520; }
             .chats-sidebar.open { left: 0; }
             .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
             .sidebar-overlay.open { display: block; }
-            .menu-btn { display: flex; background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.3rem; cursor: pointer; padding: 5px 10px; border-radius: 8px; margin-right: 10px; }
+            .menu-btn { display: flex; }
             .message { max-width: 85%; font-size: 0.85rem; }
             .input-area { padding: 10px 12px; gap: 8px; }
-            .send-btn, .voice-btn { width: 40px; height: 40px; font-size: 1.1rem; }
+            .send-btn, .voice-btn { width: 38px; height: 38px; font-size: 1rem; }
         }
         @media (min-width: 769px) {
             .menu-btn, .sidebar-overlay { display: none; }
@@ -85,8 +86,8 @@
         .chat-item:hover .leave-channel, .chat-item:hover .close-chat { opacity: 0.7; }
         .search-section { padding: 12px 16px; }
         .search-section input { width: 100%; padding: 10px 15px; border-radius: 25px; font-size: 0.9rem; outline: none; border: 1px solid #ddd; }
-        .channel-result, .user-result { padding: 10px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
-        .subscribe-btn, .start-chat-btn { background: #3498db; border: none; padding: 5px 15px; border-radius: 15px; color: white; font-size: 0.75rem; cursor: pointer; }
+        .user-result { padding: 10px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
+        .start-chat-btn { background: #3498db; border: none; padding: 5px 15px; border-radius: 15px; color: white; font-size: 0.75rem; cursor: pointer; }
         .no-results { padding: 16px; text-align: center; font-size: 0.8rem; color: #999; }
         .chat-window { flex: 1; display: flex; flex-direction: column; }
         .chat-header { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.1); }
@@ -95,7 +96,6 @@
         .chat-header-info p { font-size: 0.65rem; opacity: 0.7; }
         .messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         .message { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; animation: fadeIn 0.2s ease; position: relative; cursor: pointer; }
-        .message:active { transform: scale(0.98); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .message.own { align-self: flex-end; border-bottom-right-radius: 4px; }
         .message.other { align-self: flex-start; border-bottom-left-radius: 4px; }
@@ -112,19 +112,10 @@
         body.dark .context-menu { background: #2a2a3a; color: white; }
         .context-menu-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .context-menu-item:hover { background: rgba(0,0,0,0.05); }
-        body.dark .context-menu-item:hover { background: rgba(255,255,255,0.1); }
-        .voice-message { display: flex; align-items: center; gap: 10px; min-width: 200px; }
-        .voice-play-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
-        .voice-wave { flex: 1; height: 30px; display: flex; align-items: center; gap: 2px; }
-        .voice-wave span { width: 3px; background: currentColor; border-radius: 2px; }
-        .voice-duration { font-size: 0.7rem; opacity: 0.7; min-width: 35px; }
-        .recording-indicator { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 8px 16px; border-radius: 30px; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; z-index: 1000; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.02); } }
         .input-area { display: flex; padding: 16px 20px; gap: 12px; border-top: 1px solid rgba(0,0,0,0.1); }
         .input-area input { flex: 1; padding: 10px 16px; border-radius: 25px; font-size: 0.9rem; outline: none; }
         .send-btn, .voice-btn { background: #3498db; border: none; width: 44px; border-radius: 25px; cursor: pointer; color: white; font-size: 1.2rem; transition: 0.2s; }
         .voice-btn { background: #2ecc71; }
-        .voice-btn.recording { background: #e74c3c; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .sidebar-overlay.open { display: block; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; justify-content: center; align-items: center; }
@@ -140,7 +131,7 @@
         .modal-buttons button { flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 500; }
         .save-btn { background: #3498db; color: white; }
         .cancel-btn { background: #e74c3c; color: white; }
-        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background-size: cover; background-position: center; margin: 0 auto 15px; }
+        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background-size: cover; background-position: center; margin: 0 auto 15px; background-color: #3498db; }
         .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .auth-card { background: white; width: 380px; max-width: 90%; border-radius: 16px; padding: 35px; text-align: center; }
         body.dark .auth-card { background: #1e1e2e; color: #eee; }
@@ -152,6 +143,7 @@
         .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 10px; }
         .empty-state { text-align: center; padding: 40px; opacity: 0.6; }
         .online-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #2ecc71; margin-left: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body class="light">
@@ -198,7 +190,7 @@
 </div>
 
 <script>
-    // ПОЛНОСТЬЮ РАБОЧИЙ МЕССЕНДЖЕР
+    // ========== ПОЛНОСТЬЮ РАБОЧИЙ МЕССЕНДЖЕР ==========
     let users = [];
     let messages = [];
     let customChannels = [];
@@ -208,7 +200,6 @@
     let currentUser = null;
     let currentChat = { type: "channel", id: "general" };
     let isLoginMode = true;
-    let checkInterval = null;
     let replyToMessageId = null;
 
     const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "🎉", "👏"];
@@ -221,110 +212,51 @@
     ];
 
     const AVATAR_COLORS = ["#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6", "#1abc9c", "#e67e22", "#34495e"];
-    const CHANNEL_EMOJIS = ["🔥", "⭐", "💎", "🍕", "🎬", "⚽", "🏀", "📷", "✈️", "🌍", "💻", "🎨", "🐱", "🐶", "🚀", "💪"];
 
     // Загрузка данных
     function loadData() {
-        const savedUsers = localStorage.getItem("chat_users");
-        users = savedUsers ? JSON.parse(savedUsers) : [];
-        
-        const savedMessages = localStorage.getItem("chat_messages");
-        messages = savedMessages ? JSON.parse(savedMessages) : [];
-        
-        const savedChannels = localStorage.getItem("chat_custom_channels");
-        customChannels = savedChannels ? JSON.parse(savedChannels) : [];
-        
-        const savedPrivate = localStorage.getItem("chat_private_chats");
-        privateChats = savedPrivate ? JSON.parse(savedPrivate) : [];
-        
-        const savedSubscriptions = localStorage.getItem("chat_subscriptions");
-        userSubscriptions = savedSubscriptions ? JSON.parse(savedSubscriptions) : {};
-        
-        const savedOnline = localStorage.getItem("chat_online");
-        onlineUsers = savedOnline ? JSON.parse(savedOnline) : {};
-        
+        users = JSON.parse(localStorage.getItem("chat_users") || "[]");
+        messages = JSON.parse(localStorage.getItem("chat_messages") || "[]");
+        customChannels = JSON.parse(localStorage.getItem("chat_custom_channels") || "[]");
+        privateChats = JSON.parse(localStorage.getItem("chat_private_chats") || "[]");
+        userSubscriptions = JSON.parse(localStorage.getItem("chat_subscriptions") || "{}");
+        onlineUsers = JSON.parse(localStorage.getItem("chat_online") || "{}");
         const savedTheme = localStorage.getItem("chat_theme");
         if (savedTheme) document.body.className = savedTheme;
     }
 
-    function saveUsers() { localStorage.setItem("chat_users", JSON.stringify(users)); }
-    function saveMessages() { localStorage.setItem("chat_messages", JSON.stringify(messages)); }
-    function saveCustomChannels() { localStorage.setItem("chat_custom_channels", JSON.stringify(customChannels)); }
-    function savePrivateChats() { localStorage.setItem("chat_private_chats", JSON.stringify(privateChats)); }
-    function saveSubscriptions() { localStorage.setItem("chat_subscriptions", JSON.stringify(userSubscriptions)); }
-    function saveOnline() { localStorage.setItem("chat_online", JSON.stringify(onlineUsers)); }
-    function saveTheme(theme) { localStorage.setItem("chat_theme", theme); }
+    function saveAll() {
+        localStorage.setItem("chat_users", JSON.stringify(users));
+        localStorage.setItem("chat_messages", JSON.stringify(messages));
+        localStorage.setItem("chat_custom_channels", JSON.stringify(customChannels));
+        localStorage.setItem("chat_private_chats", JSON.stringify(privateChats));
+        localStorage.setItem("chat_subscriptions", JSON.stringify(userSubscriptions));
+        localStorage.setItem("chat_online", JSON.stringify(onlineUsers));
+    }
 
+    // Вспомогательные функции
     function getAllChannels() { return [...DEFAULT_CHANNELS, ...customChannels]; }
     function getChannelById(id) { return getAllChannels().find(c => c.id === id); }
 
     function getUserSubscribedChannels(username) {
         if (!userSubscriptions[username]) {
             userSubscriptions[username] = DEFAULT_CHANNELS.map(c => c.id);
-            saveSubscriptions();
+            saveAll();
         }
         return userSubscriptions[username];
-    }
-
-    function isSubscribedToChannel(username, channelId) {
-        return getUserSubscribedChannels(username).includes(channelId);
-    }
-
-    function subscribeToChannel(username, channelId) {
-        if (!userSubscriptions[username]) userSubscriptions[username] = DEFAULT_CHANNELS.map(c => c.id);
-        if (!userSubscriptions[username].includes(channelId)) {
-            userSubscriptions[username].push(channelId);
-            saveSubscriptions();
-            return true;
-        }
-        return false;
-    }
-
-    function unsubscribeFromChannel(username, channelId) {
-        const channel = getChannelById(channelId);
-        if (channel?.isDefault) return false;
-        if (userSubscriptions[username]) {
-            userSubscriptions[username] = userSubscriptions[username].filter(id => id !== channelId);
-            saveSubscriptions();
-            return true;
-        }
-        return false;
-    }
-
-    function getOrCreatePrivateChat(otherUser) {
-        let chat = privateChats.find(c => (c.user1 === currentUser && c.user2 === otherUser) || (c.user1 === otherUser && c.user2 === currentUser));
-        if (!chat) {
-            chat = { id: "priv_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6), user1: currentUser, user2: otherUser, createdAt: Date.now() };
-            privateChats.push(chat);
-            savePrivateChats();
-        }
-        return chat;
-    }
-
-    function deletePrivateChat(chatId) {
-        privateChats = privateChats.filter(c => c.id !== chatId);
-        savePrivateChats();
-        messages = messages.filter(m => !(m.type === "private" && m.chatId === chatId));
-        saveMessages();
-        if (currentChat.type === "private" && currentChat.id === chatId) {
-            currentChat = { type: "channel", id: "general" };
-            showMessages();
-            updateChatHeader();
-        }
-        renderSidebar();
     }
 
     function getUserProfile(username) {
         const user = users.find(u => u.name === username);
         if (user && !user.profile) {
-            user.profile = { avatarType: "color", avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, chatBackground: null, statusText: "В чате" };
-            saveUsers();
+            user.profile = { avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, statusText: "В чате" };
+            saveAll();
         }
-        return user?.profile || { avatarType: "color", avatarColor: "#3498db", avatarEmoji: "😀", avatarImage: null, chatBackground: null, statusText: "В чате" };
+        return user?.profile || { avatarColor: "#3498db", avatarEmoji: "😀", avatarImage: null, statusText: "В чате" };
     }
 
     function getAvatarHtml(profile, size = 40) {
-        if (profile.avatarType === "image" && profile.avatarImage) {
+        if (profile.avatarImage) {
             return `<img style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover;" src="${profile.avatarImage}">`;
         } else {
             return `<div style="background: ${profile.avatarColor}; width: ${size}px; height: ${size}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${size/2}px; color: white;">${profile.avatarEmoji}</div>`;
@@ -332,29 +264,32 @@
     }
 
     function isUserOnline(username) {
-        if (!onlineUsers[username]) return false;
-        return (Date.now() - onlineUsers[username]) < 30000;
+        return onlineUsers[username] && (Date.now() - onlineUsers[username]) < 30000;
     }
 
     function updateOnlineStatus() {
-        if (!currentUser) return;
-        onlineUsers[currentUser] = Date.now();
-        saveOnline();
+        if (currentUser) {
+            onlineUsers[currentUser] = Date.now();
+            saveAll();
+        }
     }
 
-    // Отправка сообщений
+    // Отправка сообщения
     function sendMessage(text) {
-        if (!text.trim() && !replyToMessageId) return;
+        if (!text.trim()) return;
         if (!currentUser) return;
         
-        if (currentChat.type === "channel" && !isSubscribedToChannel(currentUser, currentChat.id)) {
-            alert("Вы не подписаны на этот канал.");
-            return;
+        if (currentChat.type === "channel") {
+            const subs = getUserSubscribedChannels(currentUser);
+            if (!subs.includes(currentChat.id)) {
+                alert("Вы не подписаны на этот канал. Найдите его в поиске и подпишитесь.");
+                return;
+            }
         }
         
         const message = {
             id: Date.now() + "_" + Math.random().toString(36).substr(2, 8),
-            type: currentChat.type === "channel" ? "channel" : "private",
+            type: currentChat.type,
             msgType: "text",
             from: currentUser,
             text: text.trim(),
@@ -367,7 +302,7 @@
                 message.replyTo = {
                     id: originalMsg.id,
                     from: originalMsg.from,
-                    text: originalMsg.msgType === "text" ? originalMsg.text.substring(0, 80) : "🎤 Голосовое"
+                    text: originalMsg.text?.substring(0, 80) || "Сообщение"
                 };
             }
             replyToMessageId = null;
@@ -378,11 +313,10 @@
             message.channel = currentChat.id;
         } else {
             message.chatId = currentChat.id;
-            message.to = currentChat.otherUser;
         }
         
         messages.push(message);
-        saveMessages();
+        saveAll();
         renderMessages();
         
         const area = document.getElementById("messagesArea");
@@ -393,7 +327,6 @@
     function addReaction(messageId, reaction) {
         const msg = messages.find(m => m.id === messageId);
         if (!msg) return;
-        
         if (!msg.reactions) msg.reactions = {};
         if (!msg.reactions[reaction]) msg.reactions[reaction] = [];
         
@@ -404,8 +337,7 @@
         } else {
             msg.reactions[reaction].push(currentUser);
         }
-        
-        saveMessages();
+        saveAll();
         renderMessages();
     }
 
@@ -415,7 +347,7 @@
         if (msg) {
             replyToMessageId = messageId;
             const input = document.getElementById("messageInput");
-            const preview = msg.msgType === "text" ? msg.text.substring(0, 50) : "🎤 Голосовое";
+            const preview = msg.text?.substring(0, 50) || "Сообщение";
             input.placeholder = `↩️ Ответ ${msg.from}: ${preview}${msg.text?.length > 50 ? '...' : ''}`;
             input.focus();
         }
@@ -426,21 +358,23 @@
         const msg = messages.find(m => m.id === messageId);
         if (!msg) return;
         
-        const text = msg.msgType === "text" ? msg.text : "🎤 Голосовое сообщение";
         const newMsg = {
             id: Date.now() + "_" + Math.random().toString(36).substr(2, 8),
-            type: currentChat.type === "channel" ? "channel" : "private",
+            type: currentChat.type,
             msgType: "text",
             from: currentUser,
-            text: `📎 Переслано от ${msg.from}: ${text}`,
+            text: `📎 Переслано от ${msg.from}: ${msg.text}`,
             time: Date.now()
         };
         
-        if (currentChat.type === "channel") newMsg.channel = currentChat.id;
-        else { newMsg.chatId = currentChat.id; newMsg.to = currentChat.otherUser; }
+        if (currentChat.type === "channel") {
+            newMsg.channel = currentChat.id;
+        } else {
+            newMsg.chatId = currentChat.id;
+        }
         
         messages.push(newMsg);
-        saveMessages();
+        saveAll();
         renderMessages();
         setTimeout(() => { const area = document.getElementById("messagesArea"); if (area) area.scrollTop = area.scrollHeight; }, 100);
     }
@@ -450,12 +384,10 @@
         const area = document.getElementById("messagesArea");
         if (!area) return;
         
-        let chatMessages = [];
-        if (currentChat.type === "channel") {
-            chatMessages = messages.filter(m => m.type === "channel" && m.channel === currentChat.id);
-        } else {
-            chatMessages = messages.filter(m => m.type === "private" && m.chatId === currentChat.id);
-        }
+        let chatMessages = messages.filter(m => {
+            if (currentChat.type === "channel") return m.type === "channel" && m.channel === currentChat.id;
+            return m.type === "private" && m.chatId === currentChat.id;
+        });
         chatMessages.sort((a, b) => a.time - b.time);
         
         if (chatMessages.length === 0) {
@@ -470,7 +402,7 @@
             
             let replyHtml = '';
             if (msg.replyTo) {
-                replyHtml = `<div class="message-reply">↩️ <span>${escapeHtml(msg.replyTo.from)}</span>: <span class="reply-text">${escapeHtml(msg.replyTo.text)}</span></div>`;
+                replyHtml = `<div class="message-reply">↩️ <span>${escapeHtml(msg.replyTo.from)}</span>: ${escapeHtml(msg.replyTo.text)}</div>`;
             }
             
             let reactionsHtml = '';
@@ -586,7 +518,7 @@
         
         let html = `<div class="sidebar-section"><div class="section-title">📡 МОИ КАНАЛЫ (${myChannels.length})<button class="add-channel-btn" id="addChannelBtn">+</button></div>`;
         html += myChannels.map(ch => `<div class="chat-item ${currentChat.type === 'channel' && currentChat.id === ch.id ? 'active' : ''}" data-type="channel" data-id="${ch.id}"><div class="chat-avatar" style="background: #3498db;">${ch.emoji}</div><div class="chat-info"><div class="chat-name">${escapeHtml(ch.name)}</div><div class="chat-status">${ch.desc}</div></div>${!ch.isDefault ? `<button class="leave-channel" data-channel-leave="${ch.id}">🚪</button>` : ''}</div>`).join('');
-        if (myChannels.length === 0) html += '<div class="no-results">Нет подписок. Найдите каналы в поиске!</div>';
+        if (myChannels.length === 0) html += '<div class="no-results">Нет подписок. Найдите каналы через поиск!</div>';
         html += `</div>`;
         
         const myPrivateChats = privateChats.filter(c => c.user1 === currentUser || c.user2 === currentUser);
@@ -597,7 +529,7 @@
             const isOnline = isUserOnline(other);
             return `<div class="chat-item ${currentChat.type === 'private' && currentChat.id === chat.id ? 'active' : ''}" data-type="private" data-id="${chat.id}" data-other="${other}">${getAvatarHtml(profile, 40)}<div class="chat-info"><div class="chat-name">${escapeHtml(other)}${isOnline ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}</div><div class="chat-status">${profile.statusText}</div></div><button class="close-chat" data-private-leave="${chat.id}">🗑️</button></div>`;
         }).join('');
-        if (myPrivateChats.length === 0) html += '<div class="no-results">Нет личных чатов. Найдите пользователей в поиске!</div>';
+        if (myPrivateChats.length === 0) html += '<div class="no-results">Нет личных чатов. Найдите людей в поиске!</div>';
         html += `</div>`;
         
         const otherUsers = users.filter(u => u.name !== currentUser);
@@ -623,7 +555,9 @@
                 const channelId = btn.dataset.channelLeave;
                 const channel = getChannelById(channelId);
                 if (confirm(`Отписаться от канала "${channel?.name}"?`)) {
-                    unsubscribeFromChannel(currentUser, channelId);
+                    const subs = getUserSubscribedChannels(currentUser);
+                    userSubscriptions[currentUser] = subs.filter(id => id !== channelId);
+                    saveAll();
                     renderSidebar();
                     if (currentChat.type === 'channel' && currentChat.id === channelId) {
                         currentChat = { type: "channel", id: "general" };
@@ -634,6 +568,7 @@
             };
         });
         
+        // Обработчики личных чатов
         document.querySelectorAll('.chat-item[data-type="private"]').forEach(el => {
             el.onclick = (e) => {
                 if (e.target.classList.contains('close-chat')) return;
@@ -648,7 +583,17 @@
         document.querySelectorAll('.close-chat').forEach(btn => {
             btn.onclick = (e) => {
                 e.stopPropagation();
-                if (confirm("Закрыть чат?")) deletePrivateChat(btn.dataset.privateLeave);
+                if (confirm("Закрыть этот чат? История будет удалена.")) {
+                    privateChats = privateChats.filter(c => c.id !== btn.dataset.privateLeave);
+                    messages = messages.filter(m => !(m.type === "private" && m.chatId === btn.dataset.privateLeave));
+                    saveAll();
+                    if (currentChat.type === "private" && currentChat.id === btn.dataset.privateLeave) {
+                        currentChat = { type: "channel", id: "general" };
+                        renderMessages();
+                        updateChatHeader();
+                    }
+                    renderSidebar();
+                }
             };
         });
         
@@ -665,12 +610,17 @@
                     resultsDiv.innerHTML = results.map(user => {
                         const profile = getUserProfile(user.name);
                         const isOnline = isUserOnline(user.name);
-                        return `<div class="user-result" data-name="${user.name}"><div style="width: 36px; height: 36px; border-radius: 50%; background: ${profile.avatarColor}; display: flex; align-items: center; justify-content: center;">${profile.avatarEmoji}</div><div class="user-name">${escapeHtml(user.name)}${isOnline ? ' 🟢' : ' ⚫'}</div><button class="start-chat-btn" data-user="${user.name}">Написать</button></div>`;
+                        return `<div class="user-result" data-name="${user.name}"><div style="width: 36px; height: 36px; border-radius: 50%; background: ${profile.avatarColor}; display: flex; align-items: center; justify-content: center;">${profile.avatarEmoji}</div><div style="flex:1">${escapeHtml(user.name)}${isOnline ? ' 🟢' : ' ⚫'}</div><button class="start-chat-btn" data-user="${user.name}">Написать</button></div>`;
                     }).join('');
                     document.querySelectorAll('.start-chat-btn').forEach(btn => {
                         btn.onclick = (e) => {
                             e.stopPropagation();
-                            const chat = getOrCreatePrivateChat(btn.dataset.user);
+                            let chat = privateChats.find(c => (c.user1 === currentUser && c.user2 === btn.dataset.user) || (c.user1 === btn.dataset.user && c.user2 === currentUser));
+                            if (!chat) {
+                                chat = { id: "priv_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6), user1: currentUser, user2: btn.dataset.user, createdAt: Date.now() };
+                                privateChats.push(chat);
+                                saveAll();
+                            }
                             currentChat = { type: "private", id: chat.id, otherUser: btn.dataset.user };
                             renderSidebar();
                             renderMessages();
@@ -697,11 +647,16 @@
             const name = document.getElementById('channelName').value.trim();
             if (!name) { alert("Введите название"); return; }
             const desc = document.getElementById('channelDesc').value.trim();
+            const emojis = ["🔥", "⭐", "💎", "🍕", "🎬", "⚽", "🏀", "📷", "✈️", "🌍", "💻", "🎨"];
+            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
             const id = "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 8);
-            const emoji = CHANNEL_EMOJIS[Math.floor(Math.random() * CHANNEL_EMOJIS.length)];
-            customChannels.push({ id, name: `${emoji} ${name}`, desc: desc || "Пользовательский канал", emoji, creator: currentUser, isDefault: false });
-            saveCustomChannels();
-            subscribeToChannel(currentUser, id);
+            customChannels.push({ id, name: `${emoji} ${name}`, desc: desc || "Пользовательский канал", emoji: emoji, creator: currentUser, isDefault: false });
+            
+            const subs = getUserSubscribedChannels(currentUser);
+            subs.push(id);
+            userSubscriptions[currentUser] = subs;
+            
+            saveAll();
             currentChat = { type: "channel", id: id };
             renderSidebar();
             renderMessages();
@@ -738,12 +693,11 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    const profile = getUserProfile(currentUser);
-                    profile.avatarType = "image";
-                    profile.avatarImage = ev.target.result;
-                    profile.avatarColor = null;
-                    profile.avatarEmoji = null;
-                    saveUsers();
+                    const user = users.find(u => u.name === currentUser);
+                    user.profile.avatarImage = ev.target.result;
+                    user.profile.avatarColor = null;
+                    user.profile.avatarEmoji = null;
+                    saveAll();
                     document.getElementById('avatarPreview').style.backgroundImage = `url(${ev.target.result})`;
                     document.getElementById('avatarPreview').style.backgroundSize = 'cover';
                     document.getElementById('avatarPreview').innerHTML = '';
@@ -755,11 +709,11 @@
         document.getElementById('saveProfileBtn').onclick = () => {
             const newTheme = document.getElementById('themeSelect').value;
             const newStatus = document.getElementById('statusText').value;
-            const profile = getUserProfile(currentUser);
-            profile.statusText = newStatus || "В чате";
-            saveUsers();
+            const user = users.find(u => u.name === currentUser);
+            user.profile.statusText = newStatus || "В чате";
+            saveAll();
             document.body.className = newTheme;
-            saveTheme(newTheme);
+            localStorage.setItem("chat_theme", newTheme);
             updateUIAfterProfileChange();
             modal.remove();
         };
@@ -773,45 +727,37 @@
         updateChatHeader();
     }
 
+    // Синхронизация
+    let syncInterval = null;
     function startSync() {
-        if (checkInterval) clearInterval(checkInterval);
-        checkInterval = setInterval(() => {
-            try {
-                const newMessages = JSON.parse(localStorage.getItem("chat_messages"));
-                if (JSON.stringify(newMessages) !== JSON.stringify(messages)) { messages = newMessages; renderMessages(); }
-                const newUsers = JSON.parse(localStorage.getItem("chat_users"));
-                if (JSON.stringify(newUsers) !== JSON.stringify(users)) { users = newUsers; renderSidebar(); }
-                const newChannels = JSON.parse(localStorage.getItem("chat_custom_channels"));
-                if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) { customChannels = newChannels; renderSidebar(); }
-                const newPrivate = JSON.parse(localStorage.getItem("chat_private_chats"));
-                if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) { privateChats = newPrivate; renderSidebar(); }
-                const newSubs = JSON.parse(localStorage.getItem("chat_subscriptions"));
-                if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) { userSubscriptions = newSubs; renderSidebar(); updateChatHeader(); }
-                const newOnline = JSON.parse(localStorage.getItem("chat_online"));
-                if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) { onlineUsers = newOnline; renderSidebar(); updateChatHeader(); }
-            } catch(e) {}
+        if (syncInterval) clearInterval(syncInterval);
+        syncInterval = setInterval(() => {
+            const newMessages = JSON.parse(localStorage.getItem("chat_messages") || "[]");
+            if (JSON.stringify(newMessages) !== JSON.stringify(messages)) { messages = newMessages; renderMessages(); }
+            const newUsers = JSON.parse(localStorage.getItem("chat_users") || "[]");
+            if (JSON.stringify(newUsers) !== JSON.stringify(users)) { users = newUsers; renderSidebar(); }
+            const newPrivate = JSON.parse(localStorage.getItem("chat_private_chats") || "[]");
+            if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) { privateChats = newPrivate; renderSidebar(); }
+            const newSubs = JSON.parse(localStorage.getItem("chat_subscriptions") || "{}");
+            if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) { userSubscriptions = newSubs; renderSidebar(); updateChatHeader(); }
+            const newOnline = JSON.parse(localStorage.getItem("chat_online") || "{}");
+            if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) { onlineUsers = newOnline; renderSidebar(); updateChatHeader(); }
         }, 500);
         
         window.addEventListener('storage', (event) => {
-            if (event.key === 'chat_messages' && event.newValue) {
-                try { messages = JSON.parse(event.newValue); renderMessages(); } catch(e) {}
-            }
-            if (event.key === 'chat_users' && event.newValue) {
-                try { users = JSON.parse(event.newValue); renderSidebar(); } catch(e) {}
-            }
-            if (event.key === 'chat_online' && event.newValue) {
-                try { onlineUsers = JSON.parse(event.newValue); renderSidebar(); updateChatHeader(); } catch(e) {}
-            }
+            if (event.key === 'chat_messages' && event.newValue) { messages = JSON.parse(event.newValue); renderMessages(); }
+            if (event.key === 'chat_users' && event.newValue) { users = JSON.parse(event.newValue); renderSidebar(); }
+            if (event.key === 'chat_online' && event.newValue) { onlineUsers = JSON.parse(event.newValue); renderSidebar(); updateChatHeader(); }
         });
     }
 
+    // Аутентификация
     function register(name, pass) {
         if (!name.trim() || !pass.trim()) return "Заполните все поля";
         if (users.find(u => u.name === name)) return "Пользователь уже существует";
-        users.push({ name, pass, profile: { avatarType: "color", avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, chatBackground: null, statusText: "В чате" } });
+        users.push({ name, pass, profile: { avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, statusText: "В чате" } });
         userSubscriptions[name] = DEFAULT_CHANNELS.map(c => c.id);
-        saveSubscriptions();
-        saveUsers();
+        saveAll();
         return true;
     }
 
@@ -852,14 +798,12 @@
             }
         };
         
-        // Голосовые сообщения (упрощённо)
-        const voiceBtn = document.getElementById("voiceBtn");
-        voiceBtn.onclick = () => { alert("Голосовые сообщения: зажмите и говорите. В этой версии для демонстрации - просто уведомление"); };
+        document.getElementById("voiceBtn").onclick = () => { alert("🎤 Голосовые сообщения будут доступны в следующей версии!"); };
         
         document.getElementById("logoutBtn").onclick = () => {
-            if (checkInterval) clearInterval(checkInterval);
+            if (syncInterval) clearInterval(syncInterval);
             if (activityInterval) clearInterval(activityInterval);
-            if (currentUser) { onlineUsers[currentUser] = 0; saveOnline(); }
+            if (currentUser) { onlineUsers[currentUser] = 0; saveAll(); }
             currentUser = null;
             document.getElementById("appContainer").style.display = "none";
             document.getElementById("authOverlay").style.display = "flex";
