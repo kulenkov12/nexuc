@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nexus Chat | Реакции и ответы</title>
+    <title>Nexus Chat | Кроссплатформенный мессенджер</title>
     <style>
         * {
             margin: 0;
@@ -53,6 +53,7 @@
         body.light .search-box input { background: white; border: 1px solid #ddd; color: #333; }
         body.light .modal-content { background: white; }
         body.light .reaction-picker { background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        body.light .context-menu { background: white; }
 
         body.dark { background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); }
         body.dark .app-container { background: #1e1e2e; }
@@ -69,6 +70,7 @@
         body.dark .messages-area { background: #1a1a2a; }
         body.dark .modal-content { background: #1e1e2e; color: #eee; }
         body.dark .reaction-picker { background: #2a2a3a; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        body.dark .context-menu { background: #2a2a3a; color: white; }
 
         body.has-chat-bg .messages-area { background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; background-attachment: fixed !important; }
         body.has-chat-bg .message.other { backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.9); }
@@ -186,6 +188,7 @@
         .online-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #2ecc71; margin-left: 5px; animation: pulse 1.5s infinite; }
         .offline-indicator { background: #7f8c8d; animation: none; }
         .badge { background: #2ecc71; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
+        .sync-status { font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; margin-left: 10px; }
     </style>
 </head>
 <body class="light">
@@ -195,7 +198,7 @@
         <div class="logo-area">
             <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
             <div class="logo-icon">💬</div>
-            <h1>Nexus Chat</h1>
+            <h1>Nexus Chat <span class="sync-status" id="syncStatus">🟢 синхр.</span></h1>
         </div>
         <div class="user-info">
             <button class="profile-btn" id="profileBtn">👤 Профиль</button>
@@ -232,7 +235,7 @@
 </div>
 
 <script>
-    // МЕССЕНДЖЕР С РЕАКЦИЯМИ И ОТВЕТАМИ
+    // КРОССПЛАТФОРМЕННЫЙ МЕССЕНДЖЕР С СИНХРОНИЗАЦИЕЙ
     let users = [];
     let messages = [];
     let customChannels = [];
@@ -244,6 +247,7 @@
     let isLoginMode = true;
     let activityInterval = null;
     let checkInterval = null;
+    let syncTimeout = null;
 
     // Переменные для записи голоса
     let mediaRecorder = null;
@@ -296,15 +300,111 @@
         if (savedTheme) document.body.className = savedTheme;
         
         applyChatBackground();
+        updateSyncStatus(true);
     }
 
-    function saveUsers() { localStorage.setItem("chat_users", JSON.stringify(users)); }
-    function saveMessages() { localStorage.setItem("chat_messages", JSON.stringify(messages)); }
-    function saveCustomChannels() { localStorage.setItem("chat_custom_channels", JSON.stringify(customChannels)); }
-    function savePrivateChats() { localStorage.setItem("chat_private_chats", JSON.stringify(privateChats)); }
-    function saveSubscriptions() { localStorage.setItem("chat_subscriptions", JSON.stringify(userSubscriptions)); }
-    function saveOnline() { localStorage.setItem("chat_online", JSON.stringify(onlineUsers)); }
-    function saveTheme(theme) { localStorage.setItem("chat_theme", theme); }
+    function saveUsers() { localStorage.setItem("chat_users", JSON.stringify(users)); triggerSync(); }
+    function saveMessages() { localStorage.setItem("chat_messages", JSON.stringify(messages)); triggerSync(); }
+    function saveCustomChannels() { localStorage.setItem("chat_custom_channels", JSON.stringify(customChannels)); triggerSync(); }
+    function savePrivateChats() { localStorage.setItem("chat_private_chats", JSON.stringify(privateChats)); triggerSync(); }
+    function saveSubscriptions() { localStorage.setItem("chat_subscriptions", JSON.stringify(userSubscriptions)); triggerSync(); }
+    function saveOnline() { localStorage.setItem("chat_online", JSON.stringify(onlineUsers)); triggerSync(); }
+    function saveTheme(theme) { localStorage.setItem("chat_theme", theme); triggerSync(); }
+
+    function updateSyncStatus(synced) {
+        const statusEl = document.getElementById("syncStatus");
+        if (statusEl) {
+            if (synced) {
+                statusEl.innerHTML = "🟢 синхр.";
+                statusEl.style.opacity = "1";
+            } else {
+                statusEl.innerHTML = "🔄 синхр...";
+                statusEl.style.opacity = "0.7";
+            }
+        }
+    }
+
+    function triggerSync() {
+        updateSyncStatus(false);
+        if (syncTimeout) clearTimeout(syncTimeout);
+        syncTimeout = setTimeout(() => {
+            updateSyncStatus(true);
+        }, 500);
+    }
+
+    // Слушаем изменения в localStorage от других вкладок/устройств
+    function startCrossTabSync() {
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'chat_messages' && event.newValue) {
+                try {
+                    const newMessages = JSON.parse(event.newValue);
+                    if (JSON.stringify(newMessages) !== JSON.stringify(messages)) {
+                        messages = newMessages;
+                        showMessages();
+                        updateSyncStatus(true);
+                    }
+                } catch(e) {}
+            }
+            if (event.key === 'chat_users' && event.newValue) {
+                try {
+                    const newUsers = JSON.parse(event.newValue);
+                    if (JSON.stringify(newUsers) !== JSON.stringify(users)) {
+                        users = newUsers;
+                        showSidebar();
+                        updateSyncStatus(true);
+                    }
+                } catch(e) {}
+            }
+            if (event.key === 'chat_custom_channels' && event.newValue) {
+                try {
+                    const newChannels = JSON.parse(event.newValue);
+                    if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) {
+                        customChannels = newChannels;
+                        showSidebar();
+                        updateSyncStatus(true);
+                    }
+                } catch(e) {}
+            }
+            if (event.key === 'chat_private_chats' && event.newValue) {
+                try {
+                    const newPrivate = JSON.parse(event.newValue);
+                    if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) {
+                        privateChats = newPrivate;
+                        showSidebar();
+                        updateSyncStatus(true);
+                    }
+                } catch(e) {}
+            }
+            if (event.key === 'chat_subscriptions' && event.newValue) {
+                try {
+                    const newSubs = JSON.parse(event.newValue);
+                    if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) {
+                        userSubscriptions = newSubs;
+                        showSidebar();
+                        updateChatHeader();
+                        updateSyncStatus(true);
+                    }
+                } catch(e) {}
+            }
+            if (event.key === 'chat_online' && event.newValue) {
+                try {
+                    const newOnline = JSON.parse(event.newValue);
+                    if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) {
+                        onlineUsers = newOnline;
+                        showSidebar();
+                        updateChatHeader();
+                        updateSyncStatus(true);
+                    }
+                } catch(e) {}
+            }
+            if (event.key === 'chat_theme' && event.newValue) {
+                try {
+                    document.body.className = event.newValue;
+                    updateSyncStatus(true);
+                } catch(e) {}
+            }
+        });
+    }
 
     function updateOnlineStatus() {
         if (!currentUser) return;
@@ -365,8 +465,8 @@
         if (!reactions || Object.keys(reactions).length === 0) return '';
         
         let html = '<div class="message-reactions">';
-        for (const [emoji, users] of Object.entries(reactions)) {
-            html += `<span class="reaction" data-emoji="${emoji}">${emoji} <span class="reaction-count">${users.length}</span></span>`;
+        for (const [emoji, usersList] of Object.entries(reactions)) {
+            html += `<span class="reaction" data-emoji="${emoji}">${emoji} <span class="reaction-count">${usersList.length}</span></span>`;
         }
         html += '</div>';
         return html;
@@ -384,7 +484,6 @@
         input.placeholder = replyPreview;
         input.focus();
         
-        // Сохраняем ID сообщения для ответа
         window.replyToId = messageId;
     }
 
@@ -734,7 +833,6 @@
             let clickTimer = null;
             let isDoubleClick = false;
             
-            // Двойной клик для реакций
             el.addEventListener('click', (e) => {
                 if (e.target.classList.contains('reaction')) return;
                 if (clickTimer) {
@@ -744,16 +842,13 @@
                     showReactionPicker(e, messageId);
                 } else {
                     clickTimer = setTimeout(() => {
-                        if (!isDoubleClick) {
-                            // Обычный клик - ничего не делаем
-                        }
+                        if (!isDoubleClick) {}
                         clickTimer = null;
                         isDoubleClick = false;
                     }, 200);
                 }
             });
             
-            // Долгое нажатие для контекстного меню (на телефонах)
             let pressTimer = null;
             el.addEventListener('touchstart', (e) => {
                 pressTimer = setTimeout(() => {
@@ -764,7 +859,6 @@
             el.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
             el.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
             
-            // ПКМ для контекстного меню
             el.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 showContextMenu(e, messageId);
@@ -776,7 +870,6 @@
     }
     
     function showReactionPicker(event, messageId) {
-        // Удаляем существующий пикер
         const existing = document.querySelector('.reaction-picker');
         if (existing) existing.remove();
         
@@ -798,7 +891,6 @@
             });
         });
         
-        // Закрыть при клике вне
         setTimeout(() => {
             document.addEventListener('click', function closePicker(e) {
                 if (!picker.contains(e.target)) {
@@ -829,11 +921,8 @@
         menu.querySelectorAll('.context-menu-item').forEach(item => {
             item.addEventListener('click', () => {
                 const action = item.dataset.action;
-                if (action === 'reply') {
-                    replyToMessage(messageId);
-                } else if (action === 'forward') {
-                    forwardMessage(messageId);
-                }
+                if (action === 'reply') replyToMessage(messageId);
+                else if (action === 'forward') forwardMessage(messageId);
                 menu.remove();
             });
         });
@@ -1013,26 +1102,6 @@
     
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
     
-    function startChecking() {
-        if (checkInterval) clearInterval(checkInterval);
-        checkInterval = setInterval(() => {
-            try {
-                const newMessages = JSON.parse(localStorage.getItem("chat_messages"));
-                if (JSON.stringify(newMessages) !== JSON.stringify(messages)) { messages = newMessages; showMessages(); }
-                const newUsers = JSON.parse(localStorage.getItem("chat_users"));
-                if (JSON.stringify(newUsers) !== JSON.stringify(users)) { users = newUsers; showSidebar(); }
-                const newChannels = JSON.parse(localStorage.getItem("chat_custom_channels"));
-                if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) { customChannels = newChannels; showSidebar(); }
-                const newPrivate = JSON.parse(localStorage.getItem("chat_private_chats"));
-                if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) { privateChats = newPrivate; showSidebar(); }
-                const newSubs = JSON.parse(localStorage.getItem("chat_subscriptions"));
-                if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) { userSubscriptions = newSubs; showSidebar(); updateChatHeader(); }
-                const newOnline = JSON.parse(localStorage.getItem("chat_online"));
-                if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) { onlineUsers = newOnline; showSidebar(); updateChatHeader(); }
-            } catch(e) {}
-        }, 1000);
-    }
-    
     function showProfileModal() {
         const profile = getUserProfile(currentUser);
         const modal = document.createElement('div');
@@ -1159,9 +1228,30 @@
         }
     }
     
+    function startChecking() {
+        if (checkInterval) clearInterval(checkInterval);
+        checkInterval = setInterval(() => {
+            try {
+                const newMessages = JSON.parse(localStorage.getItem("chat_messages"));
+                if (JSON.stringify(newMessages) !== JSON.stringify(messages)) { messages = newMessages; showMessages(); }
+                const newUsers = JSON.parse(localStorage.getItem("chat_users"));
+                if (JSON.stringify(newUsers) !== JSON.stringify(users)) { users = newUsers; showSidebar(); }
+                const newChannels = JSON.parse(localStorage.getItem("chat_custom_channels"));
+                if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) { customChannels = newChannels; showSidebar(); }
+                const newPrivate = JSON.parse(localStorage.getItem("chat_private_chats"));
+                if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) { privateChats = newPrivate; showSidebar(); }
+                const newSubs = JSON.parse(localStorage.getItem("chat_subscriptions"));
+                if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) { userSubscriptions = newSubs; showSidebar(); updateChatHeader(); }
+                const newOnline = JSON.parse(localStorage.getItem("chat_online"));
+                if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) { onlineUsers = newOnline; showSidebar(); updateChatHeader(); }
+            } catch(e) {}
+        }, 500);
+    }
+    
     function init() {
         loadData();
         updateAuthUI();
+        startCrossTabSync();
         document.getElementById("submitAuthBtn").onclick = () => handleAuth();
         document.getElementById("switchModeBtn").onclick = () => { isLoginMode = !isLoginMode; updateAuthUI(); document.getElementById("authError").innerText = ""; };
         const now = Date.now();
