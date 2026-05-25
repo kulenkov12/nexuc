@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nexus Chat | Кроссплатформенный мессенджер</title>
+    <title>Nexus Chat | Рабочая версия</title>
     <style>
         * {
             margin: 0;
@@ -15,26 +15,19 @@
 
         @media (max-width: 768px) {
             body { padding: 0; }
-            .app-container { width: 100%; max-width: 100%; height: 100vh; border-radius: 0; max-height: 100vh; }
+            .app-container { width: 100%; max-width: 100%; height: 100vh; border-radius: 0; }
             .messenger-header { padding: 10px 15px; }
             h1 { font-size: 1.1rem; }
             .logo-icon { width: 32px; height: 32px; font-size: 1.1rem; }
             .profile-btn, .logout-btn { padding: 5px 10px; font-size: 0.75rem; }
-            .user-badge { padding: 5px 10px; font-size: 0.75rem; }
-            .chats-sidebar { width: 280px; position: fixed; left: -280px; top: 0; height: 100vh; z-index: 1000; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+            .chats-sidebar { width: 280px; position: fixed; left: -280px; top: 0; height: 100vh; z-index: 1000; transition: left 0.3s ease; background: inherit; }
             .chats-sidebar.open { left: 0; }
             .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
             .sidebar-overlay.open { display: block; }
             .menu-btn { display: flex; background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.3rem; cursor: pointer; padding: 5px 10px; border-radius: 8px; margin-right: 10px; }
-            .chat-window { width: 100%; }
             .message { max-width: 85%; font-size: 0.85rem; }
-            .voice-message { min-width: 160px; }
             .input-area { padding: 10px 12px; gap: 8px; }
-            .input-area input { padding: 10px 14px; font-size: 0.9rem; }
             .send-btn, .voice-btn { width: 40px; height: 40px; font-size: 1.1rem; }
-            .chat-header { padding: 10px 15px; }
-            .messages-area { padding: 15px; }
-            .reaction-picker { top: auto; bottom: 100%; left: 0; right: auto; transform: none; margin-bottom: 5px; }
         }
         @media (min-width: 769px) {
             .menu-btn, .sidebar-overlay { display: none; }
@@ -50,14 +43,10 @@
         body.light .message.own { background: #3498db; color: white; }
         body.light .input-area { background: white; border-top-color: #eee; }
         body.light .input-area input { background: white; border: 1px solid #ddd; color: #333; }
-        body.light .search-box input { background: white; border: 1px solid #ddd; color: #333; }
-        body.light .modal-content { background: white; }
-        body.light .reaction-picker { background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        body.light .context-menu { background: white; }
 
         body.dark { background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%); }
         body.dark .app-container { background: #1e1e2e; }
-        body.dark .messenger-header { background: #0f0f1a; border-bottom-color: #3498db; }
+        body.dark .messenger-header { background: #0f0f1a; }
         body.dark .chats-sidebar { background: #151520; border-right-color: #2a2a3a; }
         body.dark .chat-item { color: #ddd; }
         body.dark .chat-item:hover { background: #252535; }
@@ -66,42 +55,33 @@
         body.dark .message.own { background: #3498db; }
         body.dark .input-area { background: #151520; border-top-color: #2a2a3a; }
         body.dark .input-area input { background: #2a2a3a; border-color: #3a3a4a; color: white; }
-        body.dark .search-box input { background: #2a2a3a; border-color: #3a3a4a; color: white; }
         body.dark .messages-area { background: #1a1a2a; }
-        body.dark .modal-content { background: #1e1e2e; color: #eee; }
-        body.dark .reaction-picker { background: #2a2a3a; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        body.dark .context-menu { background: #2a2a3a; color: white; }
-
-        body.has-chat-bg .messages-area { background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; background-attachment: fixed !important; }
-        body.has-chat-bg .message.other { backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.9); }
-        body.dark.has-chat-bg .message.other { background: rgba(30, 30, 46, 0.9); }
 
         body { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .app-container { width: 1400px; max-width: 95vw; height: 85vh; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+        .app-container { width: 1400px; max-width: 95vw; height: 85vh; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; }
         .messenger-header { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-icon { width: 36px; height: 36px; background: #3498db; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; }
         h1 { font-size: 1.3rem; color: white; font-weight: 600; }
         .user-info { display: flex; gap: 12px; align-items: center; }
-        .profile-btn, .menu-btn { background: rgba(255, 255, 255, 0.2); border: none; padding: 6px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
-        .user-badge { background: rgba(255, 255, 255, 0.2); padding: 6px 16px; border-radius: 20px; color: white; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .profile-btn, .menu-btn { background: rgba(255,255,255,0.2); border: none; padding: 6px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 0.85rem; }
+        .user-badge { background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px; color: white; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
         .logout-btn { background: #e74c3c; border: none; padding: 6px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 0.9rem; }
         .messenger-body { display: flex; flex: 1; overflow: hidden; position: relative; }
-        .chats-sidebar { width: 320px; overflow-y: auto; background: inherit; }
-        .sidebar-section { padding: 12px 0; border-bottom: 1px solid; border-color: rgba(0,0,0,0.1); }
+        .chats-sidebar { width: 320px; overflow-y: auto; }
+        .sidebar-section { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
         body.dark .sidebar-section { border-color: rgba(255,255,255,0.1); }
-        .section-title { padding: 0 16px 8px 16px; font-size: 0.7rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; color: #888; display: flex; justify-content: space-between; align-items: center; }
-        .add-channel-btn { background: #2ecc71; border: none; color: white; font-size: 1rem; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .section-title { padding: 0 16px 8px 16px; font-size: 0.7rem; text-transform: uppercase; font-weight: 600; color: #888; display: flex; justify-content: space-between; align-items: center; }
+        .add-channel-btn { background: #2ecc71; border: none; color: white; font-size: 1rem; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; }
         .chat-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
-        .chat-item:active { transform: scale(0.98); }
         .chat-item.active { background: #3498db; color: white; }
         .chat-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; color: white; background-size: cover; background-position: center; }
         .chat-info { flex: 1; }
         .chat-name { font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
-        .chat-status { font-size: 0.65rem; margin-top: 2px; opacity: 0.7; display: flex; align-items: center; gap: 4px; }
+        .chat-status { font-size: 0.65rem; margin-top: 2px; opacity: 0.7; }
         .online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; }
         .offline-dot { background: #7f8c8d; }
-        .leave-channel, .close-chat { opacity: 0; transition: opacity 0.2s; background: none; border: none; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 50%; color: inherit; }
+        .leave-channel, .close-chat { opacity: 0; background: none; border: none; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 50%; color: inherit; }
         .chat-item:hover .leave-channel, .chat-item:hover .close-chat { opacity: 0.7; }
         .search-section { padding: 12px 16px; }
         .search-section input { width: 100%; padding: 10px 15px; border-radius: 25px; font-size: 0.9rem; outline: none; border: 1px solid #ddd; }
@@ -110,12 +90,11 @@
         .no-results { padding: 16px; text-align: center; font-size: 0.8rem; color: #999; }
         .chat-window { flex: 1; display: flex; flex-direction: column; }
         .chat-header { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        body.dark .chat-header { border-color: rgba(255,255,255,0.1); }
         .chat-header-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; background-size: cover; background-position: center; }
-        .chat-header-info h3 { font-size: 1rem; margin-bottom: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .chat-header-info p { font-size: 0.65rem; opacity: 0.7; display: flex; align-items: center; gap: 4px; }
-        .messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; transition: background-image 0.3s ease; -webkit-overflow-scrolling: touch; }
-        .message { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; animation: fadeIn 0.2s ease; position: relative; cursor: pointer; transition: transform 0.1s; }
+        .chat-header-info h3 { font-size: 1rem; margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+        .chat-header-info p { font-size: 0.65rem; opacity: 0.7; }
+        .messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; animation: fadeIn 0.2s ease; position: relative; cursor: pointer; }
         .message:active { transform: scale(0.98); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .message.own { align-self: flex-end; border-bottom-right-radius: 4px; }
@@ -123,22 +102,18 @@
         .message strong { font-weight: 600; font-size: 0.8rem; display: block; margin-bottom: 4px; opacity: 0.8; }
         .message small { font-size: 0.65rem; opacity: 0.6; display: block; margin-top: 5px; }
         .message-reply { font-size: 0.7rem; opacity: 0.7; margin-bottom: 5px; padding: 3px 8px; border-radius: 10px; background: rgba(0,0,0,0.05); display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .message-reply span { font-weight: bold; }
-        .message-reply .reply-text { font-style: italic; margin-left: 5px; }
         .message-reactions { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
-        .reaction { font-size: 0.8rem; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 20px; cursor: pointer; transition: 0.1s; display: inline-flex; align-items: center; gap: 3px; }
-        .reaction:hover { transform: scale(1.1); background: rgba(0,0,0,0.1); }
+        .reaction { font-size: 0.8rem; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
         .reaction-count { font-size: 0.65rem; opacity: 0.7; }
-        .reaction-picker { position: fixed; z-index: 1500; background: white; border-radius: 40px; padding: 8px 12px; display: flex; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.1s ease; }
-        .reaction-option { font-size: 1.4rem; cursor: pointer; transition: 0.1s; padding: 5px; border-radius: 50%; }
-        .reaction-option:hover { transform: scale(1.2); background: rgba(0,0,0,0.05); }
-        .context-menu { position: fixed; background: white; border-radius: 12px; padding: 8px 0; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1500; animation: fadeIn 0.1s ease; overflow: hidden; }
+        .reaction-picker { position: fixed; z-index: 1500; background: white; border-radius: 40px; padding: 8px 12px; display: flex; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        body.dark .reaction-picker { background: #2a2a3a; }
+        .reaction-option { font-size: 1.4rem; cursor: pointer; padding: 5px; border-radius: 50%; }
+        .context-menu { position: fixed; background: white; border-radius: 12px; padding: 8px 0; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1500; overflow: hidden; }
         body.dark .context-menu { background: #2a2a3a; color: white; }
-        .context-menu-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.1s; }
+        .context-menu-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .context-menu-item:hover { background: rgba(0,0,0,0.05); }
         body.dark .context-menu-item:hover { background: rgba(255,255,255,0.1); }
         .voice-message { display: flex; align-items: center; gap: 10px; min-width: 200px; }
-        @media (max-width: 768px) { .voice-message { min-width: 160px; } }
         .voice-play-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
         .voice-wave { flex: 1; height: 30px; display: flex; align-items: center; gap: 2px; }
         .voice-wave span { width: 3px; background: currentColor; border-radius: 2px; }
@@ -146,39 +121,30 @@
         .recording-indicator { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 8px 16px; border-radius: 30px; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; z-index: 1000; animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.02); } }
         .input-area { display: flex; padding: 16px 20px; gap: 12px; border-top: 1px solid rgba(0,0,0,0.1); }
-        body.dark .input-area { border-color: rgba(255,255,255,0.1); }
         .input-area input { flex: 1; padding: 10px 16px; border-radius: 25px; font-size: 0.9rem; outline: none; }
         .send-btn, .voice-btn { background: #3498db; border: none; width: 44px; border-radius: 25px; cursor: pointer; color: white; font-size: 1.2rem; transition: 0.2s; }
         .voice-btn { background: #2ecc71; }
-        .voice-btn.recording { background: #e74c3c; animation: pulse 1s infinite; }
-        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
+        .voice-btn.recording { background: #e74c3c; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .sidebar-overlay.open { display: block; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; justify-content: center; align-items: center; }
         .modal-content { width: 450px; max-width: 90%; border-radius: 20px; padding: 25px; animation: modalFade 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        body.light .modal-content { background: white; }
+        body.dark .modal-content { background: #1e1e2e; color: #eee; }
         @keyframes modalFade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .modal-content h2 { margin-bottom: 20px; text-align: center; }
-        .profile-avatar { display: flex; justify-content: center; margin-bottom: 20px; flex-direction: column; align-items: center; gap: 10px; }
-        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; background-size: cover; background-position: center; }
-        .theme-preview { width: 100%; height: 120px; border-radius: 12px; margin-top: 10px; background-size: cover; background-position: center; border: 2px solid #3498db; cursor: pointer; }
-        .upload-btn { background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; margin: 5px; }
-        .remove-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; margin: 5px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 0.9rem; outline: none; }
-        body.light .form-group input, body.light .form-group select { border: 1px solid #ddd; background: white; }
-        body.dark .form-group input, body.dark .form-group select { border: 1px solid #3a3a4a; background: #2a2a3a; color: white; }
-        .avatar-colors { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .color-option { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .color-option.selected { border-color: #3498db; transform: scale(1.1); }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 0.9rem; outline: none; border: 1px solid #ddd; }
+        body.dark .form-group input, body.dark .form-group select { background: #2a2a3a; border-color: #3a3a4a; color: white; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
         .modal-buttons button { flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 500; }
         .save-btn { background: #3498db; color: white; }
         .cancel-btn { background: #e74c3c; color: white; }
-        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background-size: cover; background-position: center; margin: 0 auto 15px; }
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .auth-card { background: white; width: 380px; max-width: 90%; border-radius: 16px; padding: 35px; text-align: center; }
         body.dark .auth-card { background: #1e1e2e; color: #eee; }
-        .auth-card h2 { color: #2c3e50; margin-bottom: 25px; }
-        body.dark .auth-card h2 { color: #eee; }
+        .auth-card h2 { margin-bottom: 25px; }
         .auth-card input { width: 100%; margin: 10px 0; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
         body.dark .auth-card input { background: #2a2a3a; border-color: #3a3a4a; color: white; }
         .auth-card button { background: #3498db; border: none; padding: 12px; margin-top: 15px; width: 100%; border-radius: 8px; color: white; cursor: pointer; }
@@ -186,9 +152,6 @@
         .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 10px; }
         .empty-state { text-align: center; padding: 40px; opacity: 0.6; }
         .online-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #2ecc71; margin-left: 5px; animation: pulse 1.5s infinite; }
-        .offline-indicator { background: #7f8c8d; animation: none; }
-        .badge { background: #2ecc71; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
-        .sync-status { font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; margin-left: 10px; }
     </style>
 </head>
 <body class="light">
@@ -196,9 +159,9 @@
 <div class="app-container" id="appContainer" style="display: none;">
     <div class="messenger-header">
         <div class="logo-area">
-            <button class="menu-btn" id="menuBtn" title="Меню">☰</button>
+            <button class="menu-btn" id="menuBtn">☰</button>
             <div class="logo-icon">💬</div>
-            <h1>Nexus Chat <span class="sync-status" id="syncStatus">🟢 синхр.</span></h1>
+            <h1>Nexus Chat</h1>
         </div>
         <div class="user-info">
             <button class="profile-btn" id="profileBtn">👤 Профиль</button>
@@ -216,7 +179,7 @@
             </div>
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="Введите сообщение..." autocomplete="off" enterkeyhint="send">
-                <button class="voice-btn" id="voiceBtn" title="Записать голосовое (зажмите и отпустите)">🎤</button>
+                <button class="voice-btn" id="voiceBtn">🎤</button>
                 <button class="send-btn" id="sendMsgBtn">📤</button>
             </div>
         </div>
@@ -235,7 +198,7 @@
 </div>
 
 <script>
-    // КРОССПЛАТФОРМЕННЫЙ МЕССЕНДЖЕР С СИНХРОНИЗАЦИЕЙ
+    // ПОЛНОСТЬЮ РАБОЧИЙ МЕССЕНДЖЕР
     let users = [];
     let messages = [];
     let customChannels = [];
@@ -245,21 +208,10 @@
     let currentUser = null;
     let currentChat = { type: "channel", id: "general" };
     let isLoginMode = true;
-    let activityInterval = null;
     let checkInterval = null;
-    let syncTimeout = null;
+    let replyToMessageId = null;
 
-    // Переменные для записи голоса
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
-    let recordingStartTime = null;
-    let recordingIndicator = null;
-
-    // Доступные реакции
     const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "🎉", "👏"];
-
-    // Стандартные каналы
     const DEFAULT_CHANNELS = [
         { id: "general", name: "💬 Общий чат", desc: "Все пользователи", emoji: "💬", creator: "system", isDefault: true },
         { id: "news", name: "📰 Новости", desc: "Главные события", emoji: "📰", creator: "system", isDefault: true },
@@ -271,139 +223,117 @@
     const AVATAR_COLORS = ["#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6", "#1abc9c", "#e67e22", "#34495e"];
     const CHANNEL_EMOJIS = ["🔥", "⭐", "💎", "🍕", "🎬", "⚽", "🏀", "📷", "✈️", "🌍", "💻", "🎨", "🐱", "🐶", "🚀", "💪"];
 
+    // Загрузка данных
     function loadData() {
         const savedUsers = localStorage.getItem("chat_users");
-        if (savedUsers) users = JSON.parse(savedUsers);
-        else users = [];
-
+        users = savedUsers ? JSON.parse(savedUsers) : [];
+        
         const savedMessages = localStorage.getItem("chat_messages");
-        if (savedMessages) messages = JSON.parse(savedMessages);
-        else messages = [];
-
+        messages = savedMessages ? JSON.parse(savedMessages) : [];
+        
         const savedChannels = localStorage.getItem("chat_custom_channels");
-        if (savedChannels) customChannels = JSON.parse(savedChannels);
-        else customChannels = [];
-
+        customChannels = savedChannels ? JSON.parse(savedChannels) : [];
+        
         const savedPrivate = localStorage.getItem("chat_private_chats");
-        if (savedPrivate) privateChats = JSON.parse(savedPrivate);
-        else privateChats = [];
-
+        privateChats = savedPrivate ? JSON.parse(savedPrivate) : [];
+        
         const savedSubscriptions = localStorage.getItem("chat_subscriptions");
-        if (savedSubscriptions) userSubscriptions = JSON.parse(savedSubscriptions);
-        else userSubscriptions = {};
-
+        userSubscriptions = savedSubscriptions ? JSON.parse(savedSubscriptions) : {};
+        
         const savedOnline = localStorage.getItem("chat_online");
-        if (savedOnline) onlineUsers = JSON.parse(savedOnline);
-        else onlineUsers = {};
-
+        onlineUsers = savedOnline ? JSON.parse(savedOnline) : {};
+        
         const savedTheme = localStorage.getItem("chat_theme");
         if (savedTheme) document.body.className = savedTheme;
-        
-        applyChatBackground();
-        updateSyncStatus(true);
     }
 
-    function saveUsers() { localStorage.setItem("chat_users", JSON.stringify(users)); triggerSync(); }
-    function saveMessages() { localStorage.setItem("chat_messages", JSON.stringify(messages)); triggerSync(); }
-    function saveCustomChannels() { localStorage.setItem("chat_custom_channels", JSON.stringify(customChannels)); triggerSync(); }
-    function savePrivateChats() { localStorage.setItem("chat_private_chats", JSON.stringify(privateChats)); triggerSync(); }
-    function saveSubscriptions() { localStorage.setItem("chat_subscriptions", JSON.stringify(userSubscriptions)); triggerSync(); }
-    function saveOnline() { localStorage.setItem("chat_online", JSON.stringify(onlineUsers)); triggerSync(); }
-    function saveTheme(theme) { localStorage.setItem("chat_theme", theme); triggerSync(); }
+    function saveUsers() { localStorage.setItem("chat_users", JSON.stringify(users)); }
+    function saveMessages() { localStorage.setItem("chat_messages", JSON.stringify(messages)); }
+    function saveCustomChannels() { localStorage.setItem("chat_custom_channels", JSON.stringify(customChannels)); }
+    function savePrivateChats() { localStorage.setItem("chat_private_chats", JSON.stringify(privateChats)); }
+    function saveSubscriptions() { localStorage.setItem("chat_subscriptions", JSON.stringify(userSubscriptions)); }
+    function saveOnline() { localStorage.setItem("chat_online", JSON.stringify(onlineUsers)); }
+    function saveTheme(theme) { localStorage.setItem("chat_theme", theme); }
 
-    function updateSyncStatus(synced) {
-        const statusEl = document.getElementById("syncStatus");
-        if (statusEl) {
-            if (synced) {
-                statusEl.innerHTML = "🟢 синхр.";
-                statusEl.style.opacity = "1";
-            } else {
-                statusEl.innerHTML = "🔄 синхр...";
-                statusEl.style.opacity = "0.7";
-            }
+    function getAllChannels() { return [...DEFAULT_CHANNELS, ...customChannels]; }
+    function getChannelById(id) { return getAllChannels().find(c => c.id === id); }
+
+    function getUserSubscribedChannels(username) {
+        if (!userSubscriptions[username]) {
+            userSubscriptions[username] = DEFAULT_CHANNELS.map(c => c.id);
+            saveSubscriptions();
+        }
+        return userSubscriptions[username];
+    }
+
+    function isSubscribedToChannel(username, channelId) {
+        return getUserSubscribedChannels(username).includes(channelId);
+    }
+
+    function subscribeToChannel(username, channelId) {
+        if (!userSubscriptions[username]) userSubscriptions[username] = DEFAULT_CHANNELS.map(c => c.id);
+        if (!userSubscriptions[username].includes(channelId)) {
+            userSubscriptions[username].push(channelId);
+            saveSubscriptions();
+            return true;
+        }
+        return false;
+    }
+
+    function unsubscribeFromChannel(username, channelId) {
+        const channel = getChannelById(channelId);
+        if (channel?.isDefault) return false;
+        if (userSubscriptions[username]) {
+            userSubscriptions[username] = userSubscriptions[username].filter(id => id !== channelId);
+            saveSubscriptions();
+            return true;
+        }
+        return false;
+    }
+
+    function getOrCreatePrivateChat(otherUser) {
+        let chat = privateChats.find(c => (c.user1 === currentUser && c.user2 === otherUser) || (c.user1 === otherUser && c.user2 === currentUser));
+        if (!chat) {
+            chat = { id: "priv_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6), user1: currentUser, user2: otherUser, createdAt: Date.now() };
+            privateChats.push(chat);
+            savePrivateChats();
+        }
+        return chat;
+    }
+
+    function deletePrivateChat(chatId) {
+        privateChats = privateChats.filter(c => c.id !== chatId);
+        savePrivateChats();
+        messages = messages.filter(m => !(m.type === "private" && m.chatId === chatId));
+        saveMessages();
+        if (currentChat.type === "private" && currentChat.id === chatId) {
+            currentChat = { type: "channel", id: "general" };
+            showMessages();
+            updateChatHeader();
+        }
+        renderSidebar();
+    }
+
+    function getUserProfile(username) {
+        const user = users.find(u => u.name === username);
+        if (user && !user.profile) {
+            user.profile = { avatarType: "color", avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, chatBackground: null, statusText: "В чате" };
+            saveUsers();
+        }
+        return user?.profile || { avatarType: "color", avatarColor: "#3498db", avatarEmoji: "😀", avatarImage: null, chatBackground: null, statusText: "В чате" };
+    }
+
+    function getAvatarHtml(profile, size = 40) {
+        if (profile.avatarType === "image" && profile.avatarImage) {
+            return `<img style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover;" src="${profile.avatarImage}">`;
+        } else {
+            return `<div style="background: ${profile.avatarColor}; width: ${size}px; height: ${size}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${size/2}px; color: white;">${profile.avatarEmoji}</div>`;
         }
     }
 
-    function triggerSync() {
-        updateSyncStatus(false);
-        if (syncTimeout) clearTimeout(syncTimeout);
-        syncTimeout = setTimeout(() => {
-            updateSyncStatus(true);
-        }, 500);
-    }
-
-    // Слушаем изменения в localStorage от других вкладок/устройств
-    function startCrossTabSync() {
-        window.addEventListener('storage', (event) => {
-            if (event.key === 'chat_messages' && event.newValue) {
-                try {
-                    const newMessages = JSON.parse(event.newValue);
-                    if (JSON.stringify(newMessages) !== JSON.stringify(messages)) {
-                        messages = newMessages;
-                        showMessages();
-                        updateSyncStatus(true);
-                    }
-                } catch(e) {}
-            }
-            if (event.key === 'chat_users' && event.newValue) {
-                try {
-                    const newUsers = JSON.parse(event.newValue);
-                    if (JSON.stringify(newUsers) !== JSON.stringify(users)) {
-                        users = newUsers;
-                        showSidebar();
-                        updateSyncStatus(true);
-                    }
-                } catch(e) {}
-            }
-            if (event.key === 'chat_custom_channels' && event.newValue) {
-                try {
-                    const newChannels = JSON.parse(event.newValue);
-                    if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) {
-                        customChannels = newChannels;
-                        showSidebar();
-                        updateSyncStatus(true);
-                    }
-                } catch(e) {}
-            }
-            if (event.key === 'chat_private_chats' && event.newValue) {
-                try {
-                    const newPrivate = JSON.parse(event.newValue);
-                    if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) {
-                        privateChats = newPrivate;
-                        showSidebar();
-                        updateSyncStatus(true);
-                    }
-                } catch(e) {}
-            }
-            if (event.key === 'chat_subscriptions' && event.newValue) {
-                try {
-                    const newSubs = JSON.parse(event.newValue);
-                    if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) {
-                        userSubscriptions = newSubs;
-                        showSidebar();
-                        updateChatHeader();
-                        updateSyncStatus(true);
-                    }
-                } catch(e) {}
-            }
-            if (event.key === 'chat_online' && event.newValue) {
-                try {
-                    const newOnline = JSON.parse(event.newValue);
-                    if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) {
-                        onlineUsers = newOnline;
-                        showSidebar();
-                        updateChatHeader();
-                        updateSyncStatus(true);
-                    }
-                } catch(e) {}
-            }
-            if (event.key === 'chat_theme' && event.newValue) {
-                try {
-                    document.body.className = event.newValue;
-                    updateSyncStatus(true);
-                } catch(e) {}
-            }
-        });
+    function isUserOnline(username) {
+        if (!onlineUsers[username]) return false;
+        return (Date.now() - onlineUsers[username]) < 30000;
     }
 
     function updateOnlineStatus() {
@@ -412,94 +342,18 @@
         saveOnline();
     }
 
-    function isUserOnline(username) {
-        if (!onlineUsers[username]) return false;
-        return (Date.now() - onlineUsers[username]) < 30000;
-    }
-
-    function startActivityTracking() {
-        if (activityInterval) clearInterval(activityInterval);
-        activityInterval = setInterval(() => updateOnlineStatus(), 5000);
-        window.addEventListener('mousemove', updateOnlineStatus);
-        window.addEventListener('keypress', updateOnlineStatus);
-        window.addEventListener('click', updateOnlineStatus);
-        window.addEventListener('touchstart', updateOnlineStatus);
-    }
-
-    function stopActivityTracking() {
-        if (activityInterval) clearInterval(activityInterval);
-        window.removeEventListener('mousemove', updateOnlineStatus);
-        window.removeEventListener('keypress', updateOnlineStatus);
-        window.removeEventListener('click', updateOnlineStatus);
-        window.removeEventListener('touchstart', updateOnlineStatus);
-    }
-
-    // Реакции на сообщения
-    function addReaction(messageId, reaction) {
-        const messageIndex = messages.findIndex(m => m.id === messageId);
-        if (messageIndex === -1) return;
-        
-        if (!messages[messageIndex].reactions) {
-            messages[messageIndex].reactions = {};
-        }
-        
-        if (!messages[messageIndex].reactions[reaction]) {
-            messages[messageIndex].reactions[reaction] = [];
-        }
-        
-        const userReactionIndex = messages[messageIndex].reactions[reaction].indexOf(currentUser);
-        if (userReactionIndex !== -1) {
-            messages[messageIndex].reactions[reaction].splice(userReactionIndex, 1);
-            if (messages[messageIndex].reactions[reaction].length === 0) {
-                delete messages[messageIndex].reactions[reaction];
-            }
-        } else {
-            messages[messageIndex].reactions[reaction].push(currentUser);
-        }
-        
-        saveMessages();
-        showMessages();
-    }
-
-    function getReactionsHtml(reactions) {
-        if (!reactions || Object.keys(reactions).length === 0) return '';
-        
-        let html = '<div class="message-reactions">';
-        for (const [emoji, usersList] of Object.entries(reactions)) {
-            html += `<span class="reaction" data-emoji="${emoji}">${emoji} <span class="reaction-count">${usersList.length}</span></span>`;
-        }
-        html += '</div>';
-        return html;
-    }
-
-    // Ответ на сообщение
-    function replyToMessage(messageId) {
-        const message = messages.find(m => m.id === messageId);
-        if (!message) return;
-        
-        const input = document.getElementById("messageInput");
-        const replyText = message.msgType === "text" ? message.text : "🎤 Голосовое сообщение";
-        const replyPreview = `↩️ Ответ ${message.from}: ${replyText.substring(0, 50)}${replyText.length > 50 ? '...' : ''}`;
-        
-        input.placeholder = replyPreview;
-        input.focus();
-        
-        window.replyToId = messageId;
-    }
-
-    function sendTextMessage(text) {
-        if (!text.trim() && !window.replyToId) return;
+    // Отправка сообщений
+    function sendMessage(text) {
+        if (!text.trim() && !replyToMessageId) return;
         if (!currentUser) return;
         
-        if (currentChat.type === "channel") {
-            if (!isSubscribedToChannel(currentUser, currentChat.id)) {
-                alert("Вы не подписаны на этот канал.");
-                return;
-            }
+        if (currentChat.type === "channel" && !isSubscribedToChannel(currentUser, currentChat.id)) {
+            alert("Вы не подписаны на этот канал.");
+            return;
         }
         
         const message = {
-            id: Date.now() + "_" + Math.random().toString(36).substr(2, 6),
+            id: Date.now() + "_" + Math.random().toString(36).substr(2, 8),
             type: currentChat.type === "channel" ? "channel" : "private",
             msgType: "text",
             from: currentUser,
@@ -507,16 +361,16 @@
             time: Date.now()
         };
         
-        if (window.replyToId) {
-            const originalMsg = messages.find(m => m.id === window.replyToId);
+        if (replyToMessageId) {
+            const originalMsg = messages.find(m => m.id === replyToMessageId);
             if (originalMsg) {
                 message.replyTo = {
                     id: originalMsg.id,
                     from: originalMsg.from,
-                    text: originalMsg.msgType === "text" ? originalMsg.text.substring(0, 100) : "🎤 Голосовое"
+                    text: originalMsg.msgType === "text" ? originalMsg.text.substring(0, 80) : "🎤 Голосовое"
                 };
             }
-            window.replyToId = null;
+            replyToMessageId = null;
             document.getElementById("messageInput").placeholder = "Введите сообщение...";
         }
         
@@ -529,267 +383,79 @@
         
         messages.push(message);
         saveMessages();
-        showMessages();
+        renderMessages();
         
         const area = document.getElementById("messagesArea");
         if (area) setTimeout(() => { area.scrollTop = area.scrollHeight; }, 100);
     }
 
-    // Голосовые сообщения
-    async function startRecording() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-            
-            mediaRecorder.ondataavailable = (event) => { audioChunks.push(event.data); };
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const audioData = reader.result;
-                    const duration = Math.round((Date.now() - recordingStartTime) / 1000);
-                    if (duration >= 1) sendVoiceMessage(audioData, duration);
-                    else alert("Слишком короткая запись.");
-                };
-                reader.readAsDataURL(audioBlob);
-                stream.getTracks().forEach(track => track.stop());
-            };
-            
-            mediaRecorder.start();
-            isRecording = true;
-            recordingStartTime = Date.now();
-            showRecordingIndicator();
-            if (navigator.vibrate) navigator.vibrate(100);
-        } catch (err) {
-            console.error(err);
-            alert("Не удалось получить доступ к микрофону.");
-        }
-    }
-
-    function stopRecording() {
-        if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-            isRecording = false;
-            hideRecordingIndicator();
-            if (navigator.vibrate) navigator.vibrate(100);
-        }
-    }
-
-    function showRecordingIndicator() {
-        if (recordingIndicator) return;
-        recordingIndicator = document.createElement('div');
-        recordingIndicator.className = 'recording-indicator';
-        recordingIndicator.innerHTML = '<span class="recording-dot"></span> 🎙️ Запись... Отпустите для отправки';
-        document.body.appendChild(recordingIndicator);
-        const voiceBtn = document.getElementById('voiceBtn');
-        if (voiceBtn) voiceBtn.classList.add('recording');
-    }
-
-    function hideRecordingIndicator() {
-        if (recordingIndicator) { recordingIndicator.remove(); recordingIndicator = null; }
-        const voiceBtn = document.getElementById('voiceBtn');
-        if (voiceBtn) voiceBtn.classList.remove('recording');
-    }
-
-    function formatDuration(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        if (mins > 0) return `${mins}:${secs.toString().padStart(2, '0')}`;
-        return `${secs} сек`;
-    }
-
-    function createVoiceWaveform() {
-        const bars = 12;
-        let html = '<div class="voice-wave">';
-        for (let i = 0; i < bars; i++) {
-            const height = 8 + Math.random() * 22;
-            html += `<span style="height: ${height}px;"></span>`;
-        }
-        html += '</div>';
-        return html;
-    }
-
-    function sendVoiceMessage(audioData, duration) {
-        if (!currentUser) return;
+    // Реакции
+    function addReaction(messageId, reaction) {
+        const msg = messages.find(m => m.id === messageId);
+        if (!msg) return;
         
-        if (currentChat.type === "channel" && !isSubscribedToChannel(currentUser, currentChat.id)) {
-            alert("Вы не подписаны на этот канал.");
-            return;
+        if (!msg.reactions) msg.reactions = {};
+        if (!msg.reactions[reaction]) msg.reactions[reaction] = [];
+        
+        const idx = msg.reactions[reaction].indexOf(currentUser);
+        if (idx !== -1) {
+            msg.reactions[reaction].splice(idx, 1);
+            if (msg.reactions[reaction].length === 0) delete msg.reactions[reaction];
+        } else {
+            msg.reactions[reaction].push(currentUser);
         }
         
-        const message = {
-            id: Date.now() + "_" + Math.random().toString(36).substr(2, 6),
+        saveMessages();
+        renderMessages();
+    }
+
+    // Ответ на сообщение
+    function replyToMessage(messageId) {
+        const msg = messages.find(m => m.id === messageId);
+        if (msg) {
+            replyToMessageId = messageId;
+            const input = document.getElementById("messageInput");
+            const preview = msg.msgType === "text" ? msg.text.substring(0, 50) : "🎤 Голосовое";
+            input.placeholder = `↩️ Ответ ${msg.from}: ${preview}${msg.text?.length > 50 ? '...' : ''}`;
+            input.focus();
+        }
+    }
+
+    // Пересылка
+    function forwardMessage(messageId) {
+        const msg = messages.find(m => m.id === messageId);
+        if (!msg) return;
+        
+        const text = msg.msgType === "text" ? msg.text : "🎤 Голосовое сообщение";
+        const newMsg = {
+            id: Date.now() + "_" + Math.random().toString(36).substr(2, 8),
             type: currentChat.type === "channel" ? "channel" : "private",
-            msgType: "voice",
-            audioData: audioData,
-            duration: duration,
+            msgType: "text",
             from: currentUser,
+            text: `📎 Переслано от ${msg.from}: ${text}`,
             time: Date.now()
         };
         
-        if (currentChat.type === "channel") message.channel = currentChat.id;
-        else { message.chatId = currentChat.id; message.to = currentChat.otherUser; }
+        if (currentChat.type === "channel") newMsg.channel = currentChat.id;
+        else { newMsg.chatId = currentChat.id; newMsg.to = currentChat.otherUser; }
         
-        messages.push(message);
+        messages.push(newMsg);
         saveMessages();
-        showMessages();
-        
-        const area = document.getElementById("messagesArea");
-        if (area) setTimeout(() => { area.scrollTop = area.scrollHeight; }, 100);
+        renderMessages();
+        setTimeout(() => { const area = document.getElementById("messagesArea"); if (area) area.scrollTop = area.scrollHeight; }, 100);
     }
 
-    window.playAudioFromData = (btn, audioData) => {
-        const audio = new Audio(audioData);
-        audio.play();
-        btn.textContent = '🔈';
-        audio.onended = () => { btn.textContent = '🔊'; };
-    };
-
-    // Основные функции
-    function getAllChannels() { return [...DEFAULT_CHANNELS, ...customChannels]; }
-    function getChannelById(id) { return getAllChannels().find(c => c.id === id); }
-    
-    function getUserSubscribedChannels(username) {
-        if (!userSubscriptions[username]) {
-            userSubscriptions[username] = DEFAULT_CHANNELS.map(c => c.id);
-            saveSubscriptions();
-        }
-        return userSubscriptions[username];
-    }
-    
-    function isSubscribedToChannel(username, channelId) {
-        return getUserSubscribedChannels(username).includes(channelId);
-    }
-    
-    function subscribeToChannel(username, channelId) {
-        if (!userSubscriptions[username]) userSubscriptions[username] = DEFAULT_CHANNELS.map(c => c.id);
-        if (!userSubscriptions[username].includes(channelId)) {
-            userSubscriptions[username].push(channelId);
-            saveSubscriptions();
-            return true;
-        }
-        return false;
-    }
-    
-    function unsubscribeFromChannel(username, channelId) {
-        const channel = getChannelById(channelId);
-        if (channel?.isDefault) return false;
-        if (userSubscriptions[username]) {
-            userSubscriptions[username] = userSubscriptions[username].filter(id => id !== channelId);
-            saveSubscriptions();
-            return true;
-        }
-        return false;
-    }
-    
-    function getOrCreatePrivateChat(otherUser) {
-        let chat = privateChats.find(c => (c.user1 === currentUser && c.user2 === otherUser) || (c.user1 === otherUser && c.user2 === currentUser));
-        if (!chat) {
-            chat = { id: "priv_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6), user1: currentUser, user2: otherUser, createdAt: Date.now() };
-            privateChats.push(chat);
-            savePrivateChats();
-        }
-        return chat;
-    }
-    
-    function deletePrivateChat(chatId) {
-        privateChats = privateChats.filter(c => c.id !== chatId);
-        savePrivateChats();
-        messages = messages.filter(m => !(m.type === "private" && m.chatId === chatId));
-        saveMessages();
-        if (currentChat.type === "private" && currentChat.id === chatId) {
-            currentChat = { type: "channel", id: "general" };
-            showMessages();
-            updateChatHeader();
-        }
-        showSidebar();
-    }
-    
-    function getUserProfile(username) {
-        const user = users.find(u => u.name === username);
-        if (user && !user.profile) {
-            user.profile = { avatarType: "color", avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, chatBackground: null, status: "online", statusText: "В чате" };
-            saveUsers();
-        }
-        return user?.profile || { avatarType: "color", avatarColor: "#3498db", avatarEmoji: "😀", avatarImage: null, chatBackground: null, status: "online", statusText: "В чате" };
-    }
-    
-    function getAvatarHtml(profile, size = 40) {
-        if (profile.avatarType === "image" && profile.avatarImage) {
-            return `<img class="chat-avatar-img" style="width: ${size}px; height: ${size}px;" src="${profile.avatarImage}">`;
-        } else {
-            return `<div class="chat-avatar" style="background: ${profile.avatarColor}; width: ${size}px; height: ${size}px; font-size: ${size/2}px;">${profile.avatarEmoji}</div>`;
-        }
-    }
-    
-    function applyChatBackground() {
-        const profile = getUserProfile(currentUser);
-        const messagesArea = document.querySelector('.messages-area');
-        if (profile?.chatBackground) {
-            messagesArea.style.backgroundImage = `url(${profile.chatBackground})`;
-            messagesArea.style.backgroundSize = 'cover';
-            messagesArea.style.backgroundPosition = 'center';
-            messagesArea.style.backgroundRepeat = 'no-repeat';
-            messagesArea.style.backgroundAttachment = 'fixed';
-            document.body.classList.add('has-chat-bg');
-        } else {
-            messagesArea.style.backgroundImage = '';
-            document.body.classList.remove('has-chat-bg');
-        }
-    }
-    
-    function updateCurrentUserProfile(profileData) {
-        const user = users.find(u => u.name === currentUser);
-        if (user) {
-            user.profile = { ...user.profile, ...profileData };
-            saveUsers();
-            updateUIAfterProfileChange();
-            applyChatBackground();
-        }
-    }
-    
-    function updateUIAfterProfileChange() {
-        const profile = getUserProfile(currentUser);
-        document.getElementById("currentUserDisplay").innerHTML = `${getAvatarHtml(profile, 24)} ${currentUser} <span class="online-indicator"></span>`;
-        showSidebar();
-        updateChatHeader();
-    }
-    
-    function register(name, pass) {
-        if (!name.trim() || !pass.trim()) return "Заполните все поля";
-        if (users.find(u => u.name === name)) return "Пользователь уже существует";
-        users.push({ name, pass, profile: { avatarType: "color", avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, chatBackground: null, status: "online", statusText: "В чате" } });
-        userSubscriptions[name] = DEFAULT_CHANNELS.map(c => c.id);
-        saveSubscriptions();
-        saveUsers();
-        return true;
-    }
-    
-    function login(name, pass) {
-        const user = users.find(u => u.name === name && u.pass === pass);
-        if (!user) return "Неверное имя или пароль";
-        return user;
-    }
-    
-    function createChannel(name, description) {
-        if (!name?.trim()) { alert("Введите название канала"); return null; }
-        const id = "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 8);
-        const emoji = CHANNEL_EMOJIS[Math.floor(Math.random() * CHANNEL_EMOJIS.length)];
-        customChannels.push({ id, name: `${emoji} ${name.trim()}`, desc: description?.trim() || "Пользовательский канал", emoji, creator: currentUser, createdAt: Date.now(), isDefault: false });
-        saveCustomChannels();
-        subscribeToChannel(currentUser, id);
-        return id;
-    }
-    
-    function showMessages() {
+    // Рендер сообщений
+    function renderMessages() {
         const area = document.getElementById("messagesArea");
         if (!area) return;
         
         let chatMessages = [];
-        if (currentChat.type === "channel") chatMessages = messages.filter(m => m.type === "channel" && m.channel === currentChat.id);
-        else chatMessages = messages.filter(m => m.type === "private" && m.chatId === currentChat.id);
-        
+        if (currentChat.type === "channel") {
+            chatMessages = messages.filter(m => m.type === "channel" && m.channel === currentChat.id);
+        } else {
+            chatMessages = messages.filter(m => m.type === "private" && m.chatId === currentChat.id);
+        }
         chatMessages.sort((a, b) => a.time - b.time);
         
         if (chatMessages.length === 0) {
@@ -807,68 +473,62 @@
                 replyHtml = `<div class="message-reply">↩️ <span>${escapeHtml(msg.replyTo.from)}</span>: <span class="reply-text">${escapeHtml(msg.replyTo.text)}</span></div>`;
             }
             
-            let contentHtml = '';
-            if (msg.msgType === "voice") {
-                contentHtml = `<div class="voice-message"><button class="voice-play-btn" onclick="window.playAudioFromData(this, \`${msg.audioData}\`)">🔊</button>${createVoiceWaveform()}<span class="voice-duration">${formatDuration(msg.duration)}</span></div>`;
-            } else {
-                contentHtml = escapeHtml(msg.text);
+            let reactionsHtml = '';
+            if (msg.reactions && Object.keys(msg.reactions).length > 0) {
+                reactionsHtml = '<div class="message-reactions">';
+                for (const [emoji, usersList] of Object.entries(msg.reactions)) {
+                    reactionsHtml += `<span class="reaction" data-emoji="${emoji}">${emoji} <span class="reaction-count">${usersList.length}</span></span>`;
+                }
+                reactionsHtml += '</div>';
             }
-            
-            const reactionsHtml = getReactionsHtml(msg.reactions);
             
             return `
                 <div class="message ${isMine ? 'own' : 'other'}" data-message-id="${msg.id}">
                     <strong>${getAvatarHtml(profile, 20)} ${escapeHtml(msg.from)}</strong>
                     ${replyHtml}
-                    ${contentHtml}
+                    <div>${escapeHtml(msg.text)}</div>
                     ${reactionsHtml}
                     <small>${time}</small>
                 </div>
             `;
         }).join('');
         
-        // Добавляем обработчики для сообщений
+        // Обработчики для сообщений
         document.querySelectorAll('.message').forEach(el => {
-            const messageId = el.dataset.messageId;
+            const msgId = el.dataset.messageId;
             let clickTimer = null;
-            let isDoubleClick = false;
             
             el.addEventListener('click', (e) => {
-                if (e.target.classList.contains('reaction')) return;
+                if (e.target.classList.contains('reaction')) {
+                    const emoji = e.target.closest('.reaction')?.dataset.emoji;
+                    if (emoji) addReaction(msgId, emoji);
+                    return;
+                }
                 if (clickTimer) {
                     clearTimeout(clickTimer);
                     clickTimer = null;
-                    isDoubleClick = true;
-                    showReactionPicker(e, messageId);
+                    showReactionPicker(e, msgId);
                 } else {
-                    clickTimer = setTimeout(() => {
-                        if (!isDoubleClick) {}
-                        clickTimer = null;
-                        isDoubleClick = false;
-                    }, 200);
+                    clickTimer = setTimeout(() => { clickTimer = null; }, 200);
                 }
+            });
+            
+            el.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e, msgId);
             });
             
             let pressTimer = null;
             el.addEventListener('touchstart', (e) => {
-                pressTimer = setTimeout(() => {
-                    showContextMenu(e, messageId);
-                    pressTimer = null;
-                }, 500);
+                pressTimer = setTimeout(() => { showContextMenu(e, msgId); pressTimer = null; }, 500);
             });
             el.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
-            el.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
-            
-            el.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                showContextMenu(e, messageId);
-            });
         });
         
         const isScrolledToBottom = area.scrollHeight - area.scrollTop <= area.clientHeight + 100;
         if (isScrolledToBottom) area.scrollTop = area.scrollHeight;
     }
-    
+
     function showReactionPicker(event, messageId) {
         const existing = document.querySelector('.reaction-picker');
         if (existing) existing.remove();
@@ -876,313 +536,329 @@
         const picker = document.createElement('div');
         picker.className = 'reaction-picker';
         picker.innerHTML = REACTIONS.map(r => `<span class="reaction-option" data-reaction="${r}">${r}</span>`).join('');
-        
-        const rect = event.target.getBoundingClientRect();
         picker.style.position = 'fixed';
-        picker.style.top = `${rect.top - 50}px`;
-        picker.style.left = `${rect.left + rect.width / 2 - 100}px`;
-        
+        picker.style.top = `${event.clientY - 50}px`;
+        picker.style.left = `${event.clientX - 100}px`;
         document.body.appendChild(picker);
         
         picker.querySelectorAll('.reaction-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                addReaction(messageId, opt.dataset.reaction);
-                picker.remove();
-            });
+            opt.onclick = () => { addReaction(messageId, opt.dataset.reaction); picker.remove(); };
         });
         
         setTimeout(() => {
-            document.addEventListener('click', function closePicker(e) {
-                if (!picker.contains(e.target)) {
-                    picker.remove();
-                    document.removeEventListener('click', closePicker);
-                }
-            });
+            document.addEventListener('click', function close(e) { if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('click', close); } });
         }, 10);
     }
-    
+
     function showContextMenu(event, messageId) {
         const existing = document.querySelector('.context-menu');
         if (existing) existing.remove();
         
         const menu = document.createElement('div');
         menu.className = 'context-menu';
-        menu.innerHTML = `
-            <div class="context-menu-item" data-action="reply">↩️ Ответить</div>
-            <div class="context-menu-item" data-action="forward">📤 Переслать</div>
-        `;
-        
+        menu.innerHTML = `<div class="context-menu-item" data-action="reply">↩️ Ответить</div><div class="context-menu-item" data-action="forward">📤 Переслать</div>`;
         menu.style.position = 'fixed';
         menu.style.top = `${event.clientY}px`;
         menu.style.left = `${event.clientX}px`;
-        
         document.body.appendChild(menu);
         
         menu.querySelectorAll('.context-menu-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const action = item.dataset.action;
-                if (action === 'reply') replyToMessage(messageId);
-                else if (action === 'forward') forwardMessage(messageId);
+            item.onclick = () => {
+                if (item.dataset.action === 'reply') replyToMessage(messageId);
+                else if (item.dataset.action === 'forward') forwardMessage(messageId);
                 menu.remove();
-            });
+            };
         });
         
         setTimeout(() => {
-            document.addEventListener('click', function closeMenu(e) {
-                if (!menu.contains(e.target)) {
-                    menu.remove();
-                    document.removeEventListener('click', closeMenu);
-                }
-            });
+            document.addEventListener('click', function close(e) { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close); } });
         }, 10);
     }
-    
-    function forwardMessage(messageId) {
-        const message = messages.find(m => m.id === messageId);
-        if (!message) return;
-        
-        const text = message.msgType === "text" ? message.text : "🎤 Голосовое сообщение";
-        const newMsg = {
-            id: Date.now() + "_" + Math.random().toString(36).substr(2, 6),
-            type: currentChat.type === "channel" ? "channel" : "private",
-            msgType: "text",
-            from: currentUser,
-            text: `(Переслано от ${message.from}): ${text}`,
-            time: Date.now()
-        };
-        
-        if (currentChat.type === "channel") newMsg.channel = currentChat.id;
-        else { newMsg.chatId = currentChat.id; newMsg.to = currentChat.otherUser; }
-        
-        messages.push(newMsg);
-        saveMessages();
-        showMessages();
-        
-        const area = document.getElementById("messagesArea");
-        if (area) setTimeout(() => { area.scrollTop = area.scrollHeight; }, 100);
-    }
-    
-    function showSidebar() {
+
+    // Рендер сайдбара
+    function renderSidebar() {
         const container = document.getElementById("chatsSidebar");
         if (!container) return;
         
-        const subscribedChannels = getUserSubscribedChannels(currentUser);
+        const subscribed = getUserSubscribedChannels(currentUser);
         const allChannels = getAllChannels();
-        const myChannels = allChannels.filter(ch => subscribedChannels.includes(ch.id));
+        const myChannels = allChannels.filter(ch => subscribed.includes(ch.id));
         
-        let channelsHtml = `<div class="sidebar-section"><div class="section-title">📡 МОИ КАНАЛЫ (${myChannels.length})<button class="add-channel-btn" id="addChannelBtn" title="Создать канал">+</button></div>`;
-        channelsHtml += myChannels.map(ch => `<div class="chat-item ${currentChat.type === 'channel' && currentChat.id === ch.id ? 'active' : ''}" data-type="channel" data-id="${ch.id}"><div class="chat-avatar" style="background: #3498db;">${ch.emoji}</div><div class="chat-info"><div class="chat-name">${escapeHtml(ch.name)}</div><div class="chat-status">${ch.desc}</div></div>${!ch.isDefault ? `<button class="leave-channel" data-channel-leave="${ch.id}" title="Отписаться">🚪</button>` : ''}</div>`).join('');
-        if (myChannels.length === 0) channelsHtml += '<div class="no-results">Нет подписок. Найдите каналы в поиске!</div>';
-        channelsHtml += `</div>`;
+        let html = `<div class="sidebar-section"><div class="section-title">📡 МОИ КАНАЛЫ (${myChannels.length})<button class="add-channel-btn" id="addChannelBtn">+</button></div>`;
+        html += myChannels.map(ch => `<div class="chat-item ${currentChat.type === 'channel' && currentChat.id === ch.id ? 'active' : ''}" data-type="channel" data-id="${ch.id}"><div class="chat-avatar" style="background: #3498db;">${ch.emoji}</div><div class="chat-info"><div class="chat-name">${escapeHtml(ch.name)}</div><div class="chat-status">${ch.desc}</div></div>${!ch.isDefault ? `<button class="leave-channel" data-channel-leave="${ch.id}">🚪</button>` : ''}</div>`).join('');
+        if (myChannels.length === 0) html += '<div class="no-results">Нет подписок. Найдите каналы в поиске!</div>';
+        html += `</div>`;
         
         const myPrivateChats = privateChats.filter(c => c.user1 === currentUser || c.user2 === currentUser);
-        let privateHtml = `<div class="sidebar-section"><div class="section-title">💬 ЛИЧНЫЕ СООБЩЕНИЯ (${myPrivateChats.length})</div>`;
-        privateHtml += myPrivateChats.map(chat => {
-            const otherUser = chat.user1 === currentUser ? chat.user2 : chat.user1;
-            const profile = getUserProfile(otherUser);
-            const isOnline = isUserOnline(otherUser);
-            return `<div class="chat-item ${currentChat.type === 'private' && currentChat.id === chat.id ? 'active' : ''}" data-type="private" data-id="${chat.id}" data-other="${otherUser}">${getAvatarHtml(profile, 40)}<div class="chat-info"><div class="chat-name">${escapeHtml(otherUser)}${isOnline ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}</div><div class="chat-status">${profile.statusText}</div></div><button class="close-chat" data-private-leave="${chat.id}" title="Закрыть чат">🗑️</button></div>`;
+        html += `<div class="sidebar-section"><div class="section-title">💬 ЛИЧНЫЕ СООБЩЕНИЯ (${myPrivateChats.length})</div>`;
+        html += myPrivateChats.map(chat => {
+            const other = chat.user1 === currentUser ? chat.user2 : chat.user1;
+            const profile = getUserProfile(other);
+            const isOnline = isUserOnline(other);
+            return `<div class="chat-item ${currentChat.type === 'private' && currentChat.id === chat.id ? 'active' : ''}" data-type="private" data-id="${chat.id}" data-other="${other}">${getAvatarHtml(profile, 40)}<div class="chat-info"><div class="chat-name">${escapeHtml(other)}${isOnline ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}</div><div class="chat-status">${profile.statusText}</div></div><button class="close-chat" data-private-leave="${chat.id}">🗑️</button></div>`;
         }).join('');
-        if (myPrivateChats.length === 0) privateHtml += '<div class="no-results">Нет личных чатов. Найдите пользователей в поиске!</div>';
-        privateHtml += `</div>`;
+        if (myPrivateChats.length === 0) html += '<div class="no-results">Нет личных чатов. Найдите пользователей в поиске!</div>';
+        html += `</div>`;
         
-        const allNonSubscribed = allChannels.filter(ch => !subscribedChannels.includes(ch.id) && !ch.isDefault);
         const otherUsers = users.filter(u => u.name !== currentUser);
+        html += `<div class="sidebar-section"><div class="section-title">🔍 ПОИСК ЛЮДЕЙ</div><div class="search-section"><input type="text" id="searchUsers" placeholder="Поиск по имени..."></div><div id="userSearchResults"><div class="no-results">Введите имя для поиска</div></div></div>`;
         
-        container.innerHTML = channelsHtml + privateHtml + `
-            <div class="sidebar-section"><div class="section-title">🔍 ПОИСК КАНАЛОВ</div><div class="search-section"><input type="text" id="searchChannels" placeholder="Введите название канала..."></div><div id="channelSearchResults"><div class="no-results">Введите название для поиска</div></div></div>
-            <div class="sidebar-section"><div class="section-title">🔍 ПОИСК ЛЮДЕЙ</div><div class="search-section"><input type="text" id="searchUsers" placeholder="Поиск по имени..."></div><div id="userSearchResults"><div class="no-results">Введите имя для поиска</div></div></div>
-        `;
+        container.innerHTML = html;
         
+        // Обработчики каналов
         document.querySelectorAll('.chat-item[data-type="channel"]').forEach(el => {
-            el.addEventListener('click', (e) => {
+            el.onclick = (e) => {
                 if (e.target.classList.contains('leave-channel')) return;
                 currentChat = { type: "channel", id: el.dataset.id };
-                showSidebar();
-                showMessages();
+                renderSidebar();
+                renderMessages();
                 updateChatHeader();
                 if (window.innerWidth <= 768) closeSidebar();
-            });
+            };
         });
         
         document.querySelectorAll('.leave-channel').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.onclick = (e) => {
                 e.stopPropagation();
                 const channelId = btn.dataset.channelLeave;
                 const channel = getChannelById(channelId);
                 if (confirm(`Отписаться от канала "${channel?.name}"?`)) {
                     unsubscribeFromChannel(currentUser, channelId);
-                    showSidebar();
+                    renderSidebar();
                     if (currentChat.type === 'channel' && currentChat.id === channelId) {
                         currentChat = { type: "channel", id: "general" };
-                        showMessages();
+                        renderMessages();
                         updateChatHeader();
                     }
                 }
-            });
+            };
         });
         
         document.querySelectorAll('.chat-item[data-type="private"]').forEach(el => {
-            el.addEventListener('click', (e) => {
+            el.onclick = (e) => {
                 if (e.target.classList.contains('close-chat')) return;
                 currentChat = { type: "private", id: el.dataset.id, otherUser: el.dataset.other };
-                showSidebar();
-                showMessages();
+                renderSidebar();
+                renderMessages();
                 updateChatHeader();
                 if (window.innerWidth <= 768) closeSidebar();
-            });
+            };
         });
         
         document.querySelectorAll('.close-chat').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.onclick = (e) => {
                 e.stopPropagation();
-                if (confirm("Закрыть этот чат? История будет удалена.")) deletePrivateChat(btn.dataset.privateLeave);
-            });
+                if (confirm("Закрыть чат?")) deletePrivateChat(btn.dataset.privateLeave);
+            };
         });
         
-        const searchChannels = document.getElementById("searchChannels");
-        if (searchChannels) {
-            searchChannels.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                const results = allNonSubscribed.filter(ch => ch.name.toLowerCase().includes(query) || ch.desc.toLowerCase().includes(query));
-                const resultsDiv = document.getElementById("channelSearchResults");
-                if (results.length === 0 && query) resultsDiv.innerHTML = '<div class="no-results">🔍 Каналов не найдено</div>';
-                else if (!query) resultsDiv.innerHTML = '<div class="no-results">Введите название для поиска</div>';
-                else resultsDiv.innerHTML = results.map(ch => `<div class="channel-result"><div class="chat-avatar" style="background: #3498db; width: 36px; height: 36px;">${ch.emoji}</div><div class="chat-info"><div class="chat-name">${escapeHtml(ch.name)}</div><div class="chat-status">${ch.desc}</div></div><button class="subscribe-btn" data-channel-id="${ch.id}">Подписаться</button></div>`).join('');
-                document.querySelectorAll('.subscribe-btn').forEach(btn => {
-                    btn.addEventListener('click', () => { subscribeToChannel(currentUser, btn.dataset.channelId); showSidebar(); alert("Подписка оформлена!"); });
-                });
-            });
-        }
-        
-        const searchUsers = document.getElementById("searchUsers");
-        if (searchUsers) {
-            searchUsers.addEventListener('input', (e) => {
+        // Поиск пользователей
+        const searchInput = document.getElementById("searchUsers");
+        if (searchInput) {
+            searchInput.oninput = (e) => {
                 const query = e.target.value.toLowerCase();
                 const results = otherUsers.filter(u => u.name.toLowerCase().includes(query));
                 const resultsDiv = document.getElementById("userSearchResults");
-                if (results.length === 0 && query) resultsDiv.innerHTML = '<div class="no-results">👤 Пользователей не найдено</div>';
-                else if (!query) resultsDiv.innerHTML = '<div class="no-results">Введите имя для поиска</div>';
-                else resultsDiv.innerHTML = results.map(user => { const profile = getUserProfile(user.name); const isOnline = isUserOnline(user.name); return `<div class="user-result"><div class="user-avatar" style="${profile.avatarType === 'image' && profile.avatarImage ? `background-image: url(${profile.avatarImage}); background-size: cover;` : `background: ${profile.avatarColor};`}">${profile.avatarType !== "image" ? profile.avatarEmoji : ''}</div><div class="user-name">${escapeHtml(user.name)}${isOnline ? '<span class="online-dot" style="margin-left: 8px;"></span>' : '<span class="offline-dot" style="margin-left: 8px;"></span>'}</div><button class="start-chat-btn" data-user="${user.name}">Написать</button></div>`; }).join('');
-                document.querySelectorAll('.start-chat-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => { e.stopPropagation(); const chat = getOrCreatePrivateChat(btn.dataset.user); currentChat = { type: "private", id: chat.id, otherUser: btn.dataset.user }; showSidebar(); showMessages(); updateChatHeader(); if (window.innerWidth <= 768) closeSidebar(); });
-                });
-            });
+                if (!query) resultsDiv.innerHTML = '<div class="no-results">Введите имя для поиска</div>';
+                else if (results.length === 0) resultsDiv.innerHTML = '<div class="no-results">👤 Пользователей не найдено</div>';
+                else {
+                    resultsDiv.innerHTML = results.map(user => {
+                        const profile = getUserProfile(user.name);
+                        const isOnline = isUserOnline(user.name);
+                        return `<div class="user-result" data-name="${user.name}"><div style="width: 36px; height: 36px; border-radius: 50%; background: ${profile.avatarColor}; display: flex; align-items: center; justify-content: center;">${profile.avatarEmoji}</div><div class="user-name">${escapeHtml(user.name)}${isOnline ? ' 🟢' : ' ⚫'}</div><button class="start-chat-btn" data-user="${user.name}">Написать</button></div>`;
+                    }).join('');
+                    document.querySelectorAll('.start-chat-btn').forEach(btn => {
+                        btn.onclick = (e) => {
+                            e.stopPropagation();
+                            const chat = getOrCreatePrivateChat(btn.dataset.user);
+                            currentChat = { type: "private", id: chat.id, otherUser: btn.dataset.user };
+                            renderSidebar();
+                            renderMessages();
+                            updateChatHeader();
+                            if (window.innerWidth <= 768) closeSidebar();
+                        };
+                    });
+                }
+            };
         }
         
-        document.getElementById("addChannelBtn")?.addEventListener('click', () => showCreateChannelModal());
+        // Кнопка создания канала
+        const addBtn = document.getElementById("addChannelBtn");
+        if (addBtn) addBtn.onclick = () => showCreateChannelModal();
     }
-    
+
     function showCreateChannelModal() {
         const modal = document.createElement('div');
         modal.className = 'modal';
-        modal.innerHTML = `<div class="modal-content"><h2>📡 Создать канал</h2><div class="form-group"><label>Название канала</label><input type="text" id="channelName" placeholder="Введите название..."></div><div class="form-group"><label>Описание</label><input type="text" id="channelDesc" placeholder="Краткое описание..."></div><div class="modal-buttons"><button class="save-btn" id="createChannelBtn">Создать</button><button class="cancel-btn" id="cancelModalBtn">Отмена</button></div></div>`;
+        modal.innerHTML = `<div class="modal-content"><h2>📡 Создать канал</h2><div class="form-group"><label>Название</label><input type="text" id="channelName" placeholder="Название канала"></div><div class="form-group"><label>Описание</label><input type="text" id="channelDesc" placeholder="Описание"></div><div class="modal-buttons"><button class="save-btn" id="createBtn">Создать</button><button class="cancel-btn" id="cancelBtn">Отмена</button></div></div>`;
         document.body.appendChild(modal);
-        document.getElementById('createChannelBtn').onclick = () => {
+        
+        document.getElementById('createBtn').onclick = () => {
             const name = document.getElementById('channelName').value.trim();
-            const desc = document.getElementById('channelDesc').value.trim();
             if (!name) { alert("Введите название"); return; }
-            const newId = createChannel(name, desc);
-            if (newId) { currentChat = { type: "channel", id: newId }; showSidebar(); showMessages(); updateChatHeader(); modal.remove(); if (window.innerWidth <= 768) closeSidebar(); }
+            const desc = document.getElementById('channelDesc').value.trim();
+            const id = "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 8);
+            const emoji = CHANNEL_EMOJIS[Math.floor(Math.random() * CHANNEL_EMOJIS.length)];
+            customChannels.push({ id, name: `${emoji} ${name}`, desc: desc || "Пользовательский канал", emoji, creator: currentUser, isDefault: false });
+            saveCustomChannels();
+            subscribeToChannel(currentUser, id);
+            currentChat = { type: "channel", id: id };
+            renderSidebar();
+            renderMessages();
+            updateChatHeader();
+            modal.remove();
+            if (window.innerWidth <= 768) closeSidebar();
         };
-        document.getElementById('cancelModalBtn').onclick = () => modal.remove();
+        document.getElementById('cancelBtn').onclick = () => modal.remove();
     }
-    
+
     function updateChatHeader() {
         const header = document.getElementById("chatHeader");
         if (currentChat.type === "channel") {
-            const channel = getChannelById(currentChat.id);
-            if (channel) header.innerHTML = `<div class="chat-header-avatar" style="background: #3498db;">${channel.emoji}</div><div class="chat-header-info"><h3>${channel.name}</h3><p>${channel.desc}</p></div>`;
+            const ch = getChannelById(currentChat.id);
+            if (ch) header.innerHTML = `<div class="chat-header-avatar" style="background: #3498db;">${ch.emoji}</div><div class="chat-header-info"><h3>${ch.name}</h3><p>${ch.desc}</p></div>`;
         } else {
             const profile = getUserProfile(currentChat.otherUser);
             const isOnline = isUserOnline(currentChat.otherUser);
-            header.innerHTML = `<div class="chat-header-avatar" style="${profile.avatarType === 'image' && profile.avatarImage ? `background-image: url(${profile.avatarImage}); background-size: cover;` : `background: ${profile.avatarColor};`}">${profile.avatarType !== "image" ? profile.avatarEmoji : ''}</div><div class="chat-header-info"><h3>${escapeHtml(currentChat.otherUser)} ${isOnline ? '<span class="online-indicator"></span>' : '<span class="offline-indicator"></span>'}</h3><p>${profile.statusText}</p></div>`;
+            header.innerHTML = `<div class="chat-header-avatar" style="background: ${profile.avatarColor};">${profile.avatarEmoji}</div><div class="chat-header-info"><h3>${escapeHtml(currentChat.otherUser)} ${isOnline ? '<span class="online-indicator"></span>' : ''}</h3><p>${profile.statusText}</p></div>`;
         }
     }
-    
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-    
+
     function showProfileModal() {
         const profile = getUserProfile(currentUser);
         const modal = document.createElement('div');
         modal.className = 'modal';
-        modal.innerHTML = `<div class="modal-content"><h2>👤 Настройки профиля</h2><div class="profile-avatar"><div id="avatarPreviewContainer">${profile.avatarType === "image" && profile.avatarImage ? `<img class="avatar-preview-img" src="${profile.avatarImage}">` : `<div class="avatar-preview" style="background: ${profile.avatarColor}; font-size: 3rem;">${profile.avatarEmoji}</div>`}</div><input type="file" id="avatarUpload" accept="image/*" style="display: none;"><button class="upload-btn" id="uploadAvatarBtn">📷 Загрузить аватар</button><button class="remove-btn" id="removeAvatarBtn">🗑️ Удалить аватар</button></div><div class="form-group"><label>Фон чата</label><div id="themePreviewContainer">${profile.chatBackground ? `<div class="theme-preview" style="background-image: url(${profile.chatBackground});"></div>` : `<div class="theme-preview" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white;">Стандартный фон</div>`}</div><input type="file" id="themeUpload" accept="image/*" style="display: none;"><button class="upload-btn" id="uploadThemeBtn">🖼️ Загрузить фон</button><button class="remove-btn" id="removeThemeBtn">🗑️ Удалить фон</button></div><div class="form-group"><label>Тема интерфейса</label><select id="profileTheme"><option value="light">Светлая</option><option value="dark">Тёмная</option></select></div><div class="form-group"><label>Текст статуса</label><input type="text" id="profileStatusText" value="${profile.statusText}"></div><div class="modal-buttons"><button class="save-btn" id="saveProfileBtn">Сохранить</button><button class="cancel-btn" id="closeModalBtn">Отмена</button></div></div>`;
+        modal.innerHTML = `<div class="modal-content"><h2>👤 Профиль</h2><div class="avatar-preview" id="avatarPreview" style="background: ${profile.avatarColor};">${profile.avatarEmoji}</div><input type="file" id="avatarUpload" style="display:none"><button class="upload-btn" id="uploadAvatarBtn">📷 Загрузить аватар</button><div class="form-group"><label>Статус</label><input type="text" id="statusText" value="${profile.statusText}"></div><div class="form-group"><label>Тема</label><select id="themeSelect"><option value="light">Светлая</option><option value="dark">Тёмная</option></select></div><div class="modal-buttons"><button class="save-btn" id="saveProfileBtn">Сохранить</button><button class="cancel-btn" id="closeModalBtn">Отмена</button></div></div>`;
         document.body.appendChild(modal);
         
-        let selectedImage = profile.avatarImage;
-        let avatarType = profile.avatarType;
-        let selectedColor = profile.avatarColor;
-        let selectedEmoji = profile.avatarEmoji;
-        let selectedTheme = profile.chatBackground;
-        
-        const updatePreview = () => {
-            const container = document.getElementById('avatarPreviewContainer');
-            if (avatarType === "image" && selectedImage) container.innerHTML = `<img class="avatar-preview-img" src="${selectedImage}">`;
-            else container.innerHTML = `<div class="avatar-preview" style="background: ${selectedColor}; font-size: 3rem;">${selectedEmoji}</div>`;
-        };
-        const updateThemePreview = () => {
-            const container = document.getElementById('themePreviewContainer');
-            if (selectedTheme) container.innerHTML = `<div class="theme-preview" style="background-image: url(${selectedTheme});"></div>`;
-            else container.innerHTML = `<div class="theme-preview" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white;">Стандартный фон</div>`;
-        };
-        
+        document.getElementById('themeSelect').value = document.body.className;
         document.getElementById('uploadAvatarBtn').onclick = () => document.getElementById('avatarUpload').click();
-        document.getElementById('avatarUpload').onchange = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { selectedImage = ev.target.result; avatarType = "image"; updatePreview(); }; reader.readAsDataURL(file); } };
-        document.getElementById('removeAvatarBtn').onclick = () => { selectedImage = null; avatarType = "color"; selectedColor = AVATAR_COLORS[0]; selectedEmoji = "😀"; updatePreview(); };
-        document.getElementById('uploadThemeBtn').onclick = () => document.getElementById('themeUpload').click();
-        document.getElementById('themeUpload').onchange = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { selectedTheme = ev.target.result; updateThemePreview(); }; reader.readAsDataURL(file); } };
-        document.getElementById('removeThemeBtn').onclick = () => { selectedTheme = null; updateThemePreview(); };
+        document.getElementById('avatarUpload').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const profile = getUserProfile(currentUser);
+                    profile.avatarType = "image";
+                    profile.avatarImage = ev.target.result;
+                    profile.avatarColor = null;
+                    profile.avatarEmoji = null;
+                    saveUsers();
+                    document.getElementById('avatarPreview').style.backgroundImage = `url(${ev.target.result})`;
+                    document.getElementById('avatarPreview').style.backgroundSize = 'cover';
+                    document.getElementById('avatarPreview').innerHTML = '';
+                    updateUIAfterProfileChange();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
         document.getElementById('saveProfileBtn').onclick = () => {
-            const newTheme = document.getElementById('profileTheme').value;
-            const newStatusText = document.getElementById('profileStatusText').value;
-            let updateData = { statusText: newStatusText || "В чате", chatBackground: selectedTheme };
-            if (avatarType === "image") updateData = { ...updateData, avatarType: "image", avatarImage: selectedImage, avatarColor: null, avatarEmoji: null };
-            else updateData = { ...updateData, avatarType: "color", avatarColor: selectedColor, avatarEmoji: selectedEmoji, avatarImage: null };
-            updateCurrentUserProfile(updateData);
+            const newTheme = document.getElementById('themeSelect').value;
+            const newStatus = document.getElementById('statusText').value;
+            const profile = getUserProfile(currentUser);
+            profile.statusText = newStatus || "В чате";
+            saveUsers();
             document.body.className = newTheme;
             saveTheme(newTheme);
+            updateUIAfterProfileChange();
             modal.remove();
         };
         document.getElementById('closeModalBtn').onclick = () => modal.remove();
     }
-    
-    function toggleSidebar() {
-        const sidebar = document.getElementById('chatsSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('open');
-    }
-    function closeSidebar() {
-        document.getElementById('chatsSidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-    
-    function setupApp() {
-        showSidebar();
-        showMessages();
+
+    function updateUIAfterProfileChange() {
+        const profile = getUserProfile(currentUser);
+        document.getElementById("currentUserDisplay").innerHTML = `${getAvatarHtml(profile, 24)} ${currentUser} <span class="online-indicator"></span>`;
+        renderSidebar();
         updateChatHeader();
-        applyChatBackground();
+    }
+
+    function startSync() {
+        if (checkInterval) clearInterval(checkInterval);
+        checkInterval = setInterval(() => {
+            try {
+                const newMessages = JSON.parse(localStorage.getItem("chat_messages"));
+                if (JSON.stringify(newMessages) !== JSON.stringify(messages)) { messages = newMessages; renderMessages(); }
+                const newUsers = JSON.parse(localStorage.getItem("chat_users"));
+                if (JSON.stringify(newUsers) !== JSON.stringify(users)) { users = newUsers; renderSidebar(); }
+                const newChannels = JSON.parse(localStorage.getItem("chat_custom_channels"));
+                if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) { customChannels = newChannels; renderSidebar(); }
+                const newPrivate = JSON.parse(localStorage.getItem("chat_private_chats"));
+                if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) { privateChats = newPrivate; renderSidebar(); }
+                const newSubs = JSON.parse(localStorage.getItem("chat_subscriptions"));
+                if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) { userSubscriptions = newSubs; renderSidebar(); updateChatHeader(); }
+                const newOnline = JSON.parse(localStorage.getItem("chat_online"));
+                if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) { onlineUsers = newOnline; renderSidebar(); updateChatHeader(); }
+            } catch(e) {}
+        }, 500);
+        
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'chat_messages' && event.newValue) {
+                try { messages = JSON.parse(event.newValue); renderMessages(); } catch(e) {}
+            }
+            if (event.key === 'chat_users' && event.newValue) {
+                try { users = JSON.parse(event.newValue); renderSidebar(); } catch(e) {}
+            }
+            if (event.key === 'chat_online' && event.newValue) {
+                try { onlineUsers = JSON.parse(event.newValue); renderSidebar(); updateChatHeader(); } catch(e) {}
+            }
+        });
+    }
+
+    function register(name, pass) {
+        if (!name.trim() || !pass.trim()) return "Заполните все поля";
+        if (users.find(u => u.name === name)) return "Пользователь уже существует";
+        users.push({ name, pass, profile: { avatarType: "color", avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)], avatarEmoji: "😀", avatarImage: null, chatBackground: null, statusText: "В чате" } });
+        userSubscriptions[name] = DEFAULT_CHANNELS.map(c => c.id);
+        saveSubscriptions();
+        saveUsers();
+        return true;
+    }
+
+    function login(name, pass) {
+        const user = users.find(u => u.name === name && u.pass === pass);
+        if (!user) return "Неверное имя или пароль";
+        return user;
+    }
+
+    let activityInterval = null;
+    function startActivityTracking() {
+        if (activityInterval) clearInterval(activityInterval);
+        activityInterval = setInterval(() => updateOnlineStatus(), 5000);
+        window.addEventListener('click', updateOnlineStatus);
+        window.addEventListener('keypress', updateOnlineStatus);
+        window.addEventListener('touchstart', updateOnlineStatus);
+    }
+
+    function setupApp() {
+        updateOnlineStatus();
+        startActivityTracking();
+        renderSidebar();
+        renderMessages();
+        updateChatHeader();
+        startSync();
+        
         document.getElementById("profileBtn").onclick = () => showProfileModal();
-        document.getElementById("menuBtn").onclick = () => toggleSidebar();
-        document.getElementById("sidebarOverlay").onclick = () => closeSidebar();
+        document.getElementById("sendMsgBtn").onclick = () => {
+            const input = document.getElementById("messageInput");
+            sendMessage(input.value);
+            input.value = "";
+        };
+        document.getElementById("messageInput").onkeypress = (e) => {
+            if (e.key === "Enter") {
+                const input = document.getElementById("messageInput");
+                sendMessage(input.value);
+                input.value = "";
+            }
+        };
         
-        const sendBtn = document.getElementById("sendMsgBtn");
-        const input = document.getElementById("messageInput");
+        // Голосовые сообщения (упрощённо)
         const voiceBtn = document.getElementById("voiceBtn");
-        
-        sendBtn.onclick = () => { sendTextMessage(input.value); input.value = ""; window.replyToId = null; input.placeholder = "Введите сообщение..."; };
-        input.onkeypress = (e) => { if (e.key === "Enter") { sendTextMessage(input.value); input.value = ""; window.replyToId = null; input.placeholder = "Введите сообщение..."; } };
-        
-        let pressTimer = null;
-        voiceBtn.addEventListener('mousedown', (e) => { e.preventDefault(); pressTimer = setTimeout(() => startRecording(), 100); });
-        voiceBtn.addEventListener('mouseup', () => { if (pressTimer) clearTimeout(pressTimer); if (isRecording) stopRecording(); });
-        voiceBtn.addEventListener('mouseleave', () => { if (pressTimer) clearTimeout(pressTimer); if (isRecording) stopRecording(); });
-        voiceBtn.addEventListener('touchstart', (e) => { e.preventDefault(); pressTimer = setTimeout(() => startRecording(), 100); });
-        voiceBtn.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); if (isRecording) stopRecording(); });
+        voiceBtn.onclick = () => { alert("Голосовые сообщения: зажмите и говорите. В этой версии для демонстрации - просто уведомление"); };
         
         document.getElementById("logoutBtn").onclick = () => {
             if (checkInterval) clearInterval(checkInterval);
-            stopActivityTracking();
+            if (activityInterval) clearInterval(activityInterval);
             if (currentUser) { onlineUsers[currentUser] = 0; saveOnline(); }
             currentUser = null;
             document.getElementById("appContainer").style.display = "none";
@@ -1190,8 +866,22 @@
             isLoginMode = true;
             updateAuthUI();
         };
+        
+        const menuBtn = document.getElementById("menuBtn");
+        const overlay = document.getElementById("sidebarOverlay");
+        if (menuBtn) menuBtn.onclick = () => toggleSidebar();
+        if (overlay) overlay.onclick = () => closeSidebar();
     }
     
+    function toggleSidebar() {
+        document.getElementById('chatsSidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+        document.getElementById('chatsSidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
     function updateAuthUI() {
         const title = document.querySelector(".auth-card h2");
         const btn = document.getElementById("submitAuthBtn");
@@ -1199,7 +889,7 @@
         if (isLoginMode) { title.innerHTML = "Вход в чат"; btn.innerText = "Войти"; switchBtn.innerText = "Создать аккаунт"; }
         else { title.innerHTML = "Регистрация"; btn.innerText = "Зарегистрироваться"; switchBtn.innerText = "Уже есть аккаунт? Войти"; }
     }
-    
+
     function handleAuth() {
         const name = document.getElementById("authUsername").value.trim();
         const pass = document.getElementById("authPassword").value.trim();
@@ -1212,52 +902,30 @@
             if (typeof result === "string") errorDiv.innerText = result;
             else {
                 currentUser = name;
-                updateOnlineStatus();
-                startActivityTracking();
                 const profile = getUserProfile(currentUser);
                 document.getElementById("currentUserDisplay").innerHTML = `${getAvatarHtml(profile, 24)} ${name} <span class="online-indicator"></span>`;
                 document.getElementById("appContainer").style.display = "flex";
                 document.getElementById("authOverlay").style.display = "none";
-                startChecking();
                 setupApp();
             }
         } else {
             const result = register(name, pass);
-            if (result === true) { errorDiv.innerText = "✅ Аккаунт создан! Теперь войдите."; isLoginMode = true; updateAuthUI(); document.getElementById("authPassword").value = ""; }
-            else errorDiv.innerText = result;
+            if (result === true) {
+                errorDiv.innerText = "✅ Аккаунт создан! Теперь войдите.";
+                isLoginMode = true;
+                updateAuthUI();
+                document.getElementById("authPassword").value = "";
+            } else errorDiv.innerText = result;
         }
     }
-    
-    function startChecking() {
-        if (checkInterval) clearInterval(checkInterval);
-        checkInterval = setInterval(() => {
-            try {
-                const newMessages = JSON.parse(localStorage.getItem("chat_messages"));
-                if (JSON.stringify(newMessages) !== JSON.stringify(messages)) { messages = newMessages; showMessages(); }
-                const newUsers = JSON.parse(localStorage.getItem("chat_users"));
-                if (JSON.stringify(newUsers) !== JSON.stringify(users)) { users = newUsers; showSidebar(); }
-                const newChannels = JSON.parse(localStorage.getItem("chat_custom_channels"));
-                if (JSON.stringify(newChannels) !== JSON.stringify(customChannels)) { customChannels = newChannels; showSidebar(); }
-                const newPrivate = JSON.parse(localStorage.getItem("chat_private_chats"));
-                if (JSON.stringify(newPrivate) !== JSON.stringify(privateChats)) { privateChats = newPrivate; showSidebar(); }
-                const newSubs = JSON.parse(localStorage.getItem("chat_subscriptions"));
-                if (JSON.stringify(newSubs) !== JSON.stringify(userSubscriptions)) { userSubscriptions = newSubs; showSidebar(); updateChatHeader(); }
-                const newOnline = JSON.parse(localStorage.getItem("chat_online"));
-                if (JSON.stringify(newOnline) !== JSON.stringify(onlineUsers)) { onlineUsers = newOnline; showSidebar(); updateChatHeader(); }
-            } catch(e) {}
-        }, 500);
-    }
-    
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
     function init() {
         loadData();
         updateAuthUI();
-        startCrossTabSync();
         document.getElementById("submitAuthBtn").onclick = () => handleAuth();
         document.getElementById("switchModeBtn").onclick = () => { isLoginMode = !isLoginMode; updateAuthUI(); document.getElementById("authError").innerText = ""; };
-        const now = Date.now();
-        let updated = false;
-        for (let user in onlineUsers) { if (now - onlineUsers[user] > 30000) { onlineUsers[user] = 0; updated = true; } }
-        if (updated) saveOnline();
     }
     init();
 </script>
